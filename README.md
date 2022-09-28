@@ -11,20 +11,22 @@ executables for MacOS and only some for Linux.
     > 
     > When following step 5, only step 5.1 is needed
     > 
-    > When following step 6, only the command for the community edition of visual studio was used. Additionally, not setting the created shortcut with admin rights still worked, and shortcut can be created by right clicking the windows desktop (New -> shortcut)
+    > When following step 6, only the command for the Community edition of Visual Studio was used. Additionally, not setting the created shortcut with admin rights still worked, and shortcut can be created by right-clicking the Windows desktop (New -> shortcut)
     > 
-    > Steps 6.1, 7, 8, 9 were not folowed, but worthwhile to keep in mid
+    > Compatibility with Visual Studio 2022 was tested and the project was installed successfully. When using Visual Studio 2022, the path to the executable is slightly different. By default, it is installed under C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools\VsDevCmd.bat
+    > 
+    > Steps 6.1, 7, 8, 9 were not followed, but worthwhile to keep in mind
 
-2. Download an airsim release. These can be found here (scroll to a windows release section): https://github.com/Microsoft/AirSim/releases . Development was done for the neighbourhood release (AirSimNH) and to a lesser extent the coastal environment. The code cloned without modifications works by default for neighbourhood. 
+2. Download an AirSim release. These can be found here (scroll to a Windows release section): https://github.com/Microsoft/AirSim/releases . Development was done for the neighbourhood release (AirSimNH) and to a lesser extent the coastal environment. The code cloned without modifications works by default for neighbourhood. 
 
    >Version 1.6 was used, but restrictions for using other versions are not known
    >
    >7z is recommended for extracting if the scene consists of multiple zipped files (read "Downloading large environments" in a release section)
    
-    >After extracting a sceen and trying to launch its executable, an error about not having DirectX installed may appear. In this case, DirectX runtime may have to be installed- this can be found here: https://www.microsoft.com/en-ca/download/confirmation.aspx?id=35
+    >After extracting a scene and trying to launch its executable, an error about not having DirectX installed may appear. In this case, DirectX runtime may have to be installed - this can be found here: https://www.microsoft.com/en-ca/download/confirmation.aspx?id=35
     > * Extra important: If installing DirectX, read each installation screen carefully, and make sure to uncheck "Install the Bing Bar"- you're better than that
 
-3. ***Optional*** Install Pycharm IDE- this was used during development. Any environment that allows Python to be written works
+3. ***Optional*** Install Pycharm IDE - this was used during development. Any environment that allows Python to be written works
 
 ### First Usage
 
@@ -54,11 +56,14 @@ executables for MacOS and only some for Linux.
     > Execute: roslaunch central_control full_system.launch
     > 
     > There is a chance of getting this message in the ROS console: WARNING:tornado.general:Connect error on fd 1372: WSAECONNREFUSED.
-     To fix this, search the code for "airsim.CarClient(ip=host_ip)" and replace it with "airsim.CarClient()" .
+      To fix this, search the code for "airsim.CarClient(ip=host_ip)" and replace it with "airsim.CarClient()" .
+    > 
+    > There is a chance of getting this message in the ROS console: 31mRLException: [full_system.launch] is neither a launch file in package [central_control] nor is [central_control] a launch file name.
+      To fix this, make sure the cloned repository's filepath does not contain any whitespace, then restart this step. The build and devel folders may need to be deleted first.
      
 ### Other Instructions
 
-1. Exit Ros run withg ctrl+c in ROS console. Do this before closing Airsim, which should be relaunched for every test run to start from a known situation in Airsim.
+1. Exit Ros with ctrl+c in the ROS console. Do this before closing Airsim, which should be relaunched for every test run to start from a known situation in Airsim.
 
 2. To create a new test route, download a standard installation of Python for the desktop (ROS' installation of it does not come with Tkinter). In a command prompt, navigate to the cloned project directory, go to src/mapping_navigation/scripts and execute "python TestGUI.py" to launch the route making GUI. The command "pip install Pillow" may need to be done first.
 
