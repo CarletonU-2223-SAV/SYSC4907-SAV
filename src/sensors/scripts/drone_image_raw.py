@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-# This node is not currently used. It is a copy of ./segmented_image.py
+# This node is currently unused and is mostly equivalent to segmented_image.py.
+# There are no plans to use this file, but drone imaging may be explored in the future.
 
 # AirSim Python API
 import airsim
