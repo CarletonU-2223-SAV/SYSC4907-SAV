@@ -13,7 +13,6 @@
   <node name="cruise_control" pkg="cruise_control" type="cruise_control.py" />
   <node name="speedometer" pkg="sensors" type="speedometer.py" />
 
-  <node name="mapping" pkg="mapping_navigation" type="mapping.py" />
    <!-- Making navigation node required results in ROS shutting down after the entire path has been navigated.
         This is needed for automated testing. -->
   <node name="navigation" pkg="mapping_navigation" type="navigation.py" required = "true"/>
