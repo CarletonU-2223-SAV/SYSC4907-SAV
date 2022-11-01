@@ -13,6 +13,9 @@ from road_warning import *
 from mapping_navigation.msg import PathData
 
 
+ACKERMAN_MAX = 45
+
+
 class Navigation:
     """
     This does navigation
@@ -67,14 +70,14 @@ class Navigation:
         self.car_state.update_speed(speed.data)
 
     # Checks ahead up to 5 meters scanning for a new road segment.
-    def check_ahead(self, closest_point) -> RoadWarning:
+    def check_ahead(self, closest_point: int) -> RoadWarning:
         for point in self.path[closest_point + 1:]:
             if point.segment_type != self.path[closest_point].segment_type and point.segment_type is not None:
-                if self.car_state.calc_distance(point.coordinate[0], point.coordinate[1]) < 5:
+                if self.car_state.calc_distance(point.coordinate[X_COORD], point.coordinate[Y_COORD]) < 5:
                     rospy.loginfo(
                         f'The following road segment is 5 meters or less ahead {RoadWarning(point.segment_type.value)}')
                     return RoadWarning(point.segment_type.value)
-            if self.car_state.calc_distance(point.coordinate[0], point.coordinate[1]) > 5:
+            if self.car_state.calc_distance(point.coordinate[X_COORD], point.coordinate[Y_COORD]) > 5:
                 break
 
         return RoadWarning.SAME_AHEAD
@@ -82,25 +85,24 @@ class Navigation:
     # Get the closet point to the car
     # Pure pursuit does not always keep track of the closest point so this is required to find it
     def find_nearest_point(self) -> int:
-        dx = [self.car_state.rear_x - point.coordinate[0] for point in self.path]
-        dy = [self.car_state.rear_y - point.coordinate[1] for point in self.path]
+        dx = [self.car_state.rear_x - point.coordinate[X_COORD] for point in self.path]
+        dy = [self.car_state.rear_y - point.coordinate[Y_COORD] for point in self.path]
         distances = np.hypot(dx, dy)
         index = int(np.argmin(distances))
         return index
 
-    """
-    Returns a steering angle for the car in Airsim range of -1 to 1
-    """
-
     def get_steering_angle(self) -> float:
+        """
+        Returns a steering angle for the car in Airsim range of -1 to 1
+        """
         ackerman_angle_rad, target_index = self.navigator.pure_pursuit_steer_control(self.car_state)
         if self.target_index != target_index:
             self.last_index = self.target_index
             self.target_index = target_index
-        ackerman_angle_ratio = math.degrees(ackerman_angle_rad) / 45
+        ackerman_angle_ratio = math.degrees(ackerman_angle_rad) / ACKERMAN_MAX  # Normalize
         rospy.loginfo(
-            f"Target point is {self.path[self.target_index].coordinate[0]}, {self.path[self.target_index].coordinate[1]}")
-        rospy.loginfo(f"car position {self.car_state.point.coordinate[0]}, {self.car_state.point.coordinate[1]}")
+            f"Target point is {self.path[self.target_index].coordinate[X_COORD]}, {self.path[self.target_index].coordinate[Y_COORD]}")
+        rospy.loginfo(f"car position {self.car_state.point.coordinate[X_COORD]}, {self.car_state.point.coordinate[Y_COORD]}")
         rospy.loginfo(f'Current steering angle in degrees {math.degrees(ackerman_angle_rad)}')
         return ackerman_angle_ratio
 

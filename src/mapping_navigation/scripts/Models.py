@@ -3,6 +3,9 @@
 from enum import Enum
 from typing import List, Dict, Tuple
 
+X_COORD = 0
+Y_COORD = 1
+
 
 # Model a point on the canvas
 class Point:
@@ -148,11 +151,11 @@ class MapModel:
     # Use NH map correction factors. Implement other maps dynamically later?
     def convert_point(self, point: Point) -> Tuple[float, float]:
         # re-centering correction factor
-        c1 = (point.x + MapModel.NH_correction_factor[0], point.y + MapModel.NH_correction_factor[1])
+        c1 = (point.x + MapModel.NH_correction_factor[X_COORD], point.y + MapModel.NH_correction_factor[Y_COORD])
         # scale correction
-        c2 = (c1[0]/MapModel.NH_scale_factor, c1[1]/MapModel.NH_scale_factor)
+        c2 = (c1[X_COORD]/MapModel.NH_scale_factor, c1[Y_COORD]/MapModel.NH_scale_factor)
         # weird inversion correction due to the AirSim map being "upside-down"
-        return -c2[1], c2[0]
+        return -c2[Y_COORD], c2[X_COORD]
 
     # Convert path to AirSim coords
     # TODO: include the segment type information somewhere...
@@ -170,6 +173,6 @@ class MapModel:
             segment_type = RoadSegmentType.STRAIGHT
             if con.from_seg_id is not None:
                 segment_type = self.road_segments[con.from_seg_id].seg_type
-            airsim_path.append((converted_point[0], converted_point[1], segment_type))
+            airsim_path.append((converted_point[X_COORD], converted_point[Y_COORD], segment_type))
 
         return airsim_path
