@@ -14,13 +14,14 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-      - name: Setup ROS
-        uses: ros-tooling/setup-ros@v0.4
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.8"
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install flake8 pytest
-          pip install -r dependencies.txt
+          pip install -r test_dependencies.txt
       - name: Lint with flake8
         run: |
           # stop the build if there are Python syntax errors or undefined names
@@ -29,4 +30,4 @@ jobs:
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude old_src
       - name: Test with pytest
         run: |
-          python -m pytest
+          pytest
