@@ -1,5 +1,5 @@
 <launch>
-  <arg name="host" default="localhost" />
+  <arg name="host" default="127.0.0.1" />
   <param name="/host_ip" type="string" value="$(arg host)" /> <!-- set global host_ip param -->
 
   <node name="central_control" pkg="central_control" type="central_control.py" />

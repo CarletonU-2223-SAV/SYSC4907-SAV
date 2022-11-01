@@ -55,9 +55,6 @@ executables for MacOS and only some for Linux.
     >
     > Execute: roslaunch central_control full_system.launch
     > 
-    > There is a chance of getting this message in the ROS console: WARNING:tornado.general:Connect error on fd 1372: WSAECONNREFUSED.
-      To fix this, search the code for "airsim.CarClient(ip=host_ip)" and replace it with "airsim.CarClient()" .
-    > 
     > There is a chance of getting this message in the ROS console: 31mRLException: [full_system.launch] is neither a launch file in package [central_control] nor is [central_control] a launch file name.
       To fix this, make sure the cloned repository's filepath does not contain any whitespace, then restart this step. The build and devel folders may need to be deleted first.
      
