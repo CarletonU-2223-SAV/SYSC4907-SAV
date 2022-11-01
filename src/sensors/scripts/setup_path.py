@@ -4,6 +4,8 @@
 # Else we look up grand-parent folder to see if it has airsim folder
 #    and if it does then we add that in sys.path
 
+# No module currently uses this class
+
 import os,sys,inspect,logging
 
 #this class simply tries to see if airsim 

@@ -8,6 +8,9 @@ import rospy
 from std_msgs.msg import Float64
 
 
+# This node has been replaced by the cruise control subsystem
+
+
 def setSpeed():
     pub = rospy.Publisher('sensor/speed', Float64, queue_size=1)
     rospy.init_node('setspeed', anonymous=True)

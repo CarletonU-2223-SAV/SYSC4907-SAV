@@ -12,11 +12,19 @@ from sensor_msgs.msg import Image, CompressedImage
 from sensors.msg import SceneDepth
 
 
+DEPTH_RES = 256
+
+# Airsim image indices
+DEBUG = 0
+UNCOMPRESSED_RGB = 1
+DEPTH = 2
+
+
 # Save the depth image for viewing purposes
 def save_depth_img(response):
     depth = np.array(response.image_data_float, dtype=np.float32)
     depth = depth.reshape(response.height, response.width)
-    depth = np.array(depth * 255, dtype=np.uint8)
+    depth = np.array(depth * (DEPTH_RES - 1), dtype=np.uint8)
     cv2.imwrite(f'/home/mango/depth_imgs/{rospy.Time.now()}_d.png', depth)
 
 
@@ -48,16 +56,16 @@ def airpub():
             airsim.ImageRequest(0, airsim.ImageType.DepthVis, pixels_as_float=True)
         ])
 
-        img_rgb_string = responses[1].image_data_uint8
-        # rospy.loginfo(responses[0])
+        img_rgb_string = responses[UNCOMPRESSED_RGB].image_data_uint8
+        # rospy.loginfo(responses[DEBUG])
 
         # Uncompressed Image message of scene
         msg = Image()
         msg.header.stamp = rospy.Time.now()
         msg.header.frame_id = "frameId"
         msg.encoding = "rgb8"
-        msg.height = responses[1].height  # 360  # resolution should match values in settings.json
-        msg.width = responses[1].width  # 640
+        msg.height = responses[UNCOMPRESSED_RGB].height  # 360  # resolution should match values in settings.json
+        msg.width = responses[UNCOMPRESSED_RGB].width  # 640
         msg.data = img_rgb_string
         msg.is_bigendian = 0
         msg.step = msg.width * 3
@@ -66,10 +74,10 @@ def airpub():
         # cmp_img = CompressedImage()
         # cmp_img.header.stamp = rospy.Time.now()
         # cmp_img.format = 'png'
-        # cmp_img.data = responses[0].image_data_uint8
+        # cmp_img.data = responses[DEBUG].image_data_uint8
 
-        # depth = np.array(responses[2].image_data_float, dtype=np.float32)
-        # depth = depth.reshape(responses[2].height, responses[2].width)
+        # depth = np.array(responses[DEPTH].image_data_float, dtype=np.float32)
+        # depth = depth.reshape(responses[DEPTH].height, responses[DEPTH].width)
         # depth = np.array(depth * 255, dtype=np.uint8)
 
         # Depth image
@@ -82,7 +90,7 @@ def airpub():
 
         # Depth + scene images
         combine = SceneDepth()
-        combine.depth_data = responses[2].image_data_float
+        combine.depth_data = responses[DEPTH].image_data_float
         combine.scene = msg
 
         # Publish the messages

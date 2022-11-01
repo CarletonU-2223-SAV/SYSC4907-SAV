@@ -22,18 +22,18 @@ def segmented_image():
 
     while not rospy.is_shutdown():
         # get camera images from the car
-        responses = client.simGetImages([airsim.ImageRequest("1", airsim.ImageType.Segmentation, False, False)])  # scene vision image in uncompressed RGB array
-
-        for response in responses:
-            img_rgb_string = response.image_data_uint8
+        responses = client.simGetImages([airsim.ImageRequest("1", airsim.ImageType.Segmentation, False,
+                                                             False)])  # scene vision image in uncompressed RGB array
+        response = responses[0]
+        img_rgb_string = response.image_data_uint8
 
         # Populate image message
         msg = Image()
         msg.header.stamp = rospy.Time.now()
         msg.header.frame_id = "frameId"
         msg.encoding = "rgb8"
-        msg.height = 360  # resolution should match values in settings.json
-        msg.width = 640
+        msg.height = response.height  # resolution should match values in settings.json
+        msg.width = response.width
         msg.data = img_rgb_string
         msg.is_bigendian = 0
         msg.step = msg.width * 3
