@@ -1,4 +1,4 @@
-from testing.PythonTests.lane_keep_assist import lane_detect_test
+from lane_metrics import lane_detect_test
 
 
 def main():
