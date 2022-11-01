@@ -10,11 +10,28 @@ from sensors.msg import SceneDepth
 # ROS Image message
 from sensor_msgs.msg import Image
 from std_msgs.msg import String
-from typing import List
+from typing import List, Tuple
 import math
 
+DEPTH_RES = 256
+MAX_DEPTH = 100
+DIFF_WEIGHT = 0.20
 
-# Stubbed class
+# Bounding box parameters
+GREEN = (0, 255, 0)
+PADDING = 10
+NORMAL_FONT = 0
+
+# Object detection tuple indices
+XMIN = 0
+YMIN = 1
+XMAX = 2
+YMAX = 3
+CONFIDENCE = 4
+CLASS_NUM = 5
+NAME = 6
+
+
 class SignDetector:
     def __init__(self):
         self.model = torch.hub.load('ultralytics/yolov5', 'yolov5s')
@@ -45,13 +62,15 @@ class SignDetector:
         # Match with scene depth
         depth = np.array(combine.depth_data, dtype=np.float32)
         depth = depth.reshape(combine.scene.height, combine.scene.width)
-        depth = np.array(depth * 255, dtype=np.uint8)
+        depth = np.array(depth * (DEPTH_RES - 1), dtype=np.uint8)
 
         # Find median depth value for each detection box
         for detect in res:
-            x1, x2, y1, y2 = math.floor(detect.xmin), math.floor(detect.xmax), math.floor(detect.ymin), math.floor(detect.ymax)
-            xdif, ydif = x2-x1, y2-y1
-            x1_s, x2_s, y1_s, y2_s = math.floor(x1+0.20*xdif), math.floor(x2-0.20*xdif), math.floor(y1+0.20*ydif), math.floor(y2-0.20*ydif)
+            x1, x2 = math.floor(detect.xmin), math.floor(detect.xmax)
+            y1, y2 = math.floor(detect.ymin), math.floor(detect.ymax)
+            xdif, ydif = x2 - x1, y2 - y1
+            x1_s, x2_s = math.floor(x1 + DIFF_WEIGHT * xdif), math.floor(x2 - DIFF_WEIGHT * xdif)
+            y1_s, y2_s = math.floor(y1 + DIFF_WEIGHT * ydif), math.floor(y2 - DIFF_WEIGHT * ydif)
 
             sub = depth[y1_s:y2_s, x1_s:x2_s]
             med = np.median(sub)
@@ -61,14 +80,11 @@ class SignDetector:
                 rospy.loginfo(sub.shape)
 
             # Range of values is 0 to 100 m
-            detect.depth = med / 2.56  # (256/100)
+            detect.depth = med / DEPTH_RES * MAX_DEPTH
 
             # Draw bounding boxes
-            # cv2.rectangle(depth, (x1, y1), (x2, y2), (0, 255, 0), 2)
-            # cv2.putText(depth, f'{detect.name}: {detect.depth}', (x2+10, y2), 0, 0.3, (0, 255, 0))
-
-            cv2.rectangle(img_rgb, (x1, y1), (x2, y2), (0, 255, 0), 2)
-            cv2.putText(img_rgb, f'{detect.name}: {detect.depth}', (x2+10, y2), 0, 0.3, (0, 255, 0))
+            cv2.rectangle(img_rgb, (x1, y1), (x2, y2), GREEN, 2)
+            cv2.putText(img_rgb, f'{detect.name}: {detect.depth}', (x2 + PADDING, y2), NORMAL_FONT, 0.3, GREEN)
 
         # Write debug images to visualize the detections.
         # DONT LEAVE THIS ON FOR LONG PERIODS OF TIME OR YOU WILL FILL YOUR HARD DRIVE WITH PNGS
@@ -85,6 +101,7 @@ class SignDetector:
         # return detection results consisting of bounding boxes and classes
         results = self.model(img)
         results.print()
+        res_list: List[Tuple[float, float, float, float, float, int, str]]
         res_list = results.pandas().xyxy[0].to_numpy().tolist()
 
         detect_results = []
@@ -99,17 +116,17 @@ class SignDetector:
         }
         for elem in res_list:
             # Skip adding the result if not a relevant class
-            if elem[5] not in imp_classes:
+            if elem[CLASS_NUM] not in imp_classes:
                 continue
 
             dr = DetectionResult()
-            dr.xmin = elem[0]
-            dr.ymin = elem[1]
-            dr.xmax = elem[2]
-            dr.ymax = elem[3]
-            dr.confidence = elem[4]
-            dr.class_num = elem[5]
-            dr.name = elem[6]
+            dr.xmin = elem[XMIN]
+            dr.ymin = elem[YMIN]
+            dr.xmax = elem[XMAX]
+            dr.ymax = elem[YMAX]
+            dr.confidence = elem[CONFIDENCE]
+            dr.class_num = elem[CLASS_NUM]
+            dr.name = elem[NAME]
             detect_results.append(dr)
 
         return detect_results
