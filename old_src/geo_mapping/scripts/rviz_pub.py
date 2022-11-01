@@ -272,7 +272,7 @@ def airpub():
         odom_pub.publish(odom_msg)
         depth_cam_pub.publish(camera_info_msg)
         depth_pub.publish(depth_msg)
-        
+
         # log PoseStamped message
         rospy.loginfo(simPose)
         # sleeps until next cycle

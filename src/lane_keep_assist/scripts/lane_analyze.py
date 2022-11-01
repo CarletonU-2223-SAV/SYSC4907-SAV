@@ -14,7 +14,6 @@ from lane_bound_status import LaneBoundStatus
 def lane_interpret(img: np.ndarray, segmented_img: np.ndarray) -> Tuple[Tuple[LaneBoundStatus, LaneBoundStatus, LaneBoundStatus],
                                                                         Tuple[float, float], Tuple[List[float], List[float], List[float]], int]:
     bridge = CvBridge()
-    height = img.height
 
     if img and segmented_img:
         try:

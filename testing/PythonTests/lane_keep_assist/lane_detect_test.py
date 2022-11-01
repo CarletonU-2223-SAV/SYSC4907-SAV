@@ -1,8 +1,8 @@
-from scripts.lane_detect import *
-from scripts.lane_bound_status import LaneBoundStatus
+from src.lane_keep_assist.scripts.lane_detect import *
+from src.lane_keep_assist.scripts.lane_bound_status import LaneBoundStatus
 from sklearn import metrics
 from typing import List, Tuple
-from scripts.lane_detect import *
+from src.lane_keep_assist.scripts.lane_detect import *
 import numpy as np
 import cv2 as cv
 import os

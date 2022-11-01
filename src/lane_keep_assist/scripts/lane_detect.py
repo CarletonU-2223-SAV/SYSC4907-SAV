@@ -15,6 +15,13 @@ HOUGH_MAX_LINE_GAP_SEGMENTED = 5
 CANNY_MIN_THRESHOLD = 150
 CANNY_MAX_THRESHOLD = 200
 
+yellow_lower_arr = [10, 120, 40]
+yellow_upper_arr = [65, 255, 255]
+white_low_arr = [0, 230, 0]
+white_up_arr = [255, 255, 255]
+
+radian_covert = 180
+
 
 # HLS thresholding on the image
 def hls_thresholding(image: np.ndarray) -> np.ndarray:
@@ -27,12 +34,12 @@ def hls_thresholding(image: np.ndarray) -> np.ndarray:
     hls_image = cv.merge([h, l, s])
 
     # Yellow lower and upper threshold values
-    yellow_lower = np.array([10, 120, 40], dtype="uint8")
-    yellow_upper = np.array([65, 255, 255], dtype="uint8")
+    yellow_lower = np.array(yellow_lower_arr, dtype="uint8")
+    yellow_upper = np.array(yellow_upper_arr, dtype="uint8")
 
     # Upper and lower thresholds for a white or very close to white color
-    lower_white = np.array([0, 230, 0], dtype="uint8")
-    upper_white = np.array([255, 255, 255], dtype="uint8")
+    lower_white = np.array(white_low_arr, dtype="uint8")
+    upper_white = np.array(white_up_arr, dtype="uint8")
 
     # Apply the yellow thresholding
     yellow_mask = cv.inRange(hls_image, yellow_lower, yellow_upper)
@@ -76,7 +83,7 @@ def mask_image(edges: np.ndarray) -> np.ndarray:
 # Detect the hough lines
 def hough_line_detection(edges: np.ndarray) -> List[Tuple[float, float, float, float]]:
     rho = 1  # distance precision in pixel, i.e. 1 pixel
-    angle = np.pi / 180  # angular precision in radian, i.e. 1 degree
+    angle = np.pi / radian_covert  # angular precision in radian, i.e. 1 degree
     min_threshold = HOUGH_MIN_VOTES  # minimal of votes
     line_segments = cv.HoughLinesP(edges, rho, angle, min_threshold,
                                    np.array([]), minLineLength=HOUGH_MIN_LINE_LENGTH, maxLineGap=HOUGH_MAX_LINE_GAP)
@@ -87,7 +94,7 @@ def hough_line_detection(edges: np.ndarray) -> List[Tuple[float, float, float, f
 # Detect the hough lines, different methods to try using different parameters for segmented image
 def hough_line_detection_segmentation(edges: np.ndarray) -> List[Tuple[float, float, float, float]]:
     rho = 1  # distance precision in pixel, i.e. 1 pixel
-    angle = np.pi / 180  # angular precision in radian, i.e. 1 degree
+    angle = np.pi / radian_covert  # angular precision in radian, i.e. 1 degree
     min_threshold = HOUGH_MIN_VOTES_SEGMENTED  # minimal of votes
     line_segments = cv.HoughLinesP(edges, rho, angle, min_threshold,
                                    np.array([]), minLineLength=HOUGH_MIN_LINE_LENGTH_SEGMENTED, maxLineGap=HOUGH_MAX_LINE_GAP_SEGMENTED)
