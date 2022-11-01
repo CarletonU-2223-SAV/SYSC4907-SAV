@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="9ab90f66-3a1a-4f53-b985-5ee50e269d74" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/mapping_navigation/scripts/test_new_coords.pickle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/central_control/scripts/central_control.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/central_control/scripts/central_control.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lidar_object_recognition/scripts/cluster_detection.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/lidar_object_recognition/scripts/cluster_detection.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/mapping_navigation/scripts/navigation.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/mapping_navigation/scripts/navigation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/sensors/scripts/car_image_raw.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/sensors/scripts/car_image_raw.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/sensors/scripts/car_pose.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/sensors/scripts/car_pose.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/sensors/scripts/lidar.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/sensors/scripts/lidar.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/sensors/scripts/segmented_image.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/sensors/scripts/segmented_image.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/sensors/scripts/speedometer.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/sensors/scripts/speedometer.py" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="2EoY8kJ5LVVW3fuMcf1qZfQnQqH" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/SYSC4907-SAV&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;
+  }
+}</component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="9ab90f66-3a1a-4f53-b985-5ee50e269d74" name="Changes" comment="" />
+      <created>1663263246682</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1663263246682</updated>
+      <workItem from="1663263248218" duration="626000" />
+      <workItem from="1663461146471" duration="1192000" />
+      <workItem from="1664053641862" duration="3503000" />
+      <workItem from="1664325859405" duration="3607000" />
+      <workItem from="1664480231759" duration="9103000" />
+      <workItem from="1664736598420" duration="1571000" />
+      <workItem from="1664748281031" duration="7793000" />
+      <workItem from="1664763572518" duration="148000" />
+      <workItem from="1664846426741" duration="5424000" />
+      <workItem from="1665083122732" duration="1320000" />
+      <workItem from="1665453397668" duration="755000" />
+      <workItem from="1665522489511" duration="1316000" />
+      <workItem from="1667158064033" duration="2091000" />
+      <workItem from="1667163731660" duration="1550000" />
+      <workItem from="1667301632403" duration="2266000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+  </component>
+</project>

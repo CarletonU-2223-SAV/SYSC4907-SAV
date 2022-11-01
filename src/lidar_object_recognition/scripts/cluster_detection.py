@@ -19,7 +19,7 @@ class ClusterDetection:
 
         host_ip = rospy.get_param('/host_ip')
 
-        self.client = airsim.CarClient(ip=host_ip)
+        self.client = airsim.CarClient()
         self.client.confirmConnection()
 
     # Finds the bounding boxes of detected clusters in the point cloud. The returned
