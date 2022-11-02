@@ -5,7 +5,7 @@ import os
 
 # Just a fn to take to a picture and save it while using airsim
 def take_picture(index):
-    client = airsim.CarClient()
+    client = airsim.CarClient(ip=host_ip)
     client.confirmConnection()
 
     responses = client.simGetImages([airsim.ImageRequest("1", airsim.ImageType.Scene, False, False)])

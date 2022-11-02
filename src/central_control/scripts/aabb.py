@@ -30,9 +30,6 @@ class AABB:
         z = 2
 
         for point in aabb_corner_points:
-            # delta_x = pos[x] - point[x]
-            # delta_y = pos[y] - point[y]
-            # delta_z = pos[z] - point[z]
             delta_x = point[x]
             delta_y = point[y]
             delta_z = point[z]

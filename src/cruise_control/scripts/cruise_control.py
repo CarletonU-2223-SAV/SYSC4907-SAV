@@ -33,7 +33,7 @@ class CruiseControl:
 
         # Probably should have same rate for this node and speedometer to make them more in sync
         # Higher the rate the smoother the constant speed is, but will take more CPU power
-        rate = rospy.Rate(30)
+        rate = rospy.Rate(30) #30hz
         while not rospy.is_shutdown():
             self.publish_results()
             rate.sleep()

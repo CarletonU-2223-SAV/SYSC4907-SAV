@@ -1,13 +1,15 @@
 import math
 import os
 
+TARGET_SPEED = 5.0
+
 class PIDController:
 
     def __init__(self):
         # This depends on exp_factor in pidToCarValues()
         self.speed_adjustment_factor = 1.15
         self.current_speed = 0.0
-        self.target_speed = 5.0 * self.speed_adjustment_factor
+        self.target_speed = TARGET_SPEED * self.speed_adjustment_factor
 
         self.speed_difference_sum = 0
         self.last_error = 0

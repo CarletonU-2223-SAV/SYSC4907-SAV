@@ -81,6 +81,34 @@ ROADWARNINGSPEEDS = {RoadWarning.TURN_AHEAD: 2.5, RoadWarning.INTERSECTION_AHEAD
                      RoadWarning.STRAIGHT_ROAD_AHEAD: 5}
 ROADSEGMENTSPEEDS = {RoadSegmentType.STRAIGHT: 5, RoadSegmentType.INTERSECTION: 2.5, RoadSegmentType.TURN: 2.5}
 
+INITIAL_COOLDOWN = 8
+INITIAL_SPEED = 0
+
+IMAGE_WIDTH = 640
+
+FONT = 0
+FONT_SCALE = 0.3
+REC_THICKNESS = 2
+LINE_THICKNESS = 3
+
+LOOKAHEAD_DEPTH = 15
+REACT_DEPTH = 10
+
+RED = (0, 0, 255)
+GREEN = (0, 255, 0)
+YELLOW = (0, 255, 255)
+
+LEFT_TURN_ANGLE = -0.8
+RIGHT_TURN_ANGLE = 0.8
+MAX_TURN_ANGLE = 1.0
+
+STOPPED_SPEED = 0.001
+HOLD_BRAKE = 1
+RELEASE_BRAKE = 0
+STOP_THROTTLE = 0
+
+THRESHOLD = 0.4
+
 
 class CentralControl:
     """Central Controller containing logic that processes all the sensor data"""
@@ -88,19 +116,19 @@ class CentralControl:
     def __init__(self):
         host_ip = rospy.get_param('/host_ip')
 
-        self.client = airsim.CarClient()
+        self.client = airsim.CarClient(ip=host_ip)
         self.client.confirmConnection()
         self.client.enableApiControl(True)
         self.car_controls = airsim.CarControls()
 
         self.ready = False
-        self.speed: float = 0
+        self.speed: float = INITIAL_SPEED
         self.cc_state: Set[CCState] = {CCState.NORMAL}
 
         # Store detected sign and object data. Should refresh every object-detect cycle
         self.sign_data: List[DetectionResult] = []
         self.stop_state: StopState = StopState.NONE
-        self.stop_cooldown: int = 8
+        self.stop_cooldown: int = INITIAL_COOLDOWN
 
         self.object_data: List[DetectionResult] = []
 
@@ -147,9 +175,9 @@ class CentralControl:
         rospy.Subscriber("lidar_data", Float64MultiArray, self.handle_lidar_detection)
 
         # Midpoint of the image width
-        MID_X = 640 / 2
+        MID_X = IMAGE_WIDTH / 2
 
-        rate = rospy.Rate(10)
+        rate = rospy.Rate(10)  # 10hz
         while not rospy.is_shutdown():
             # TODO: some intelligent decision making process here?
             self.avoid.clear()
@@ -168,9 +196,9 @@ class CentralControl:
             if self.stop_state != StopState.RESUMING:
                 for sign in self.sign_data:
                     # Heuristic values
-                    if sign.depth < 10:
+                    if sign.depth < REACT_DEPTH:
                         self.stop_state = StopState.STOPPING
-                    elif sign.depth <= 15:
+                    elif sign.depth <= LOOKAHEAD_DEPTH:
                         self.cc_state.add(CCState.STREET_RULE)
                         self.stop_state = StopState.DETECTED
                         break
@@ -203,7 +231,7 @@ class CentralControl:
                     # Get x-center, y near the bottom of bounding box
                     cx, cy = (obj.xmax + obj.xmin) / 2, 0.5 * (obj.ymax - obj.ymin) + obj.ymin
                     # Check if in danger zone
-                    if cy > (l_slope * cx + l_int) and cy > (r_slope * cx + r_int) and obj.depth < 15:
+                    if cy > (l_slope * cx + l_int) and cy > (r_slope * cx + r_int) and obj.depth < LOOKAHEAD_DEPTH:
                         is_danger = True
                         self.cc_state.add(CCState.OBJECT_AVOID)
                         self.avoid.append(obj)
@@ -211,11 +239,11 @@ class CentralControl:
 
                     # Add bounding boxes for debug image
                     # Colours are (B, G, R)
-                    color = (0, 0, 255) if is_danger else (0, 255, 0)
+                    color = RED if is_danger else GREEN
                     x1, x2, y1, y2 = math.floor(obj.xmin), math.floor(obj.xmax), math.floor(obj.ymin), math.floor(
                         obj.ymax)
-                    cv.rectangle(scene, (x1, y1), (x2, y2), color, 2)
-                    cv.putText(scene, f'{obj.name}: {obj.depth}', (x2 + 10, y2), 0, 0.3, color)
+                    cv.rectangle(scene, (x1, y1), (x2, y2), color, REC_THICKNESS)
+                    cv.putText(scene, f'{obj.name}: {obj.depth}', (x2 + 10, y2), FONT, FONT_SCALE, color)
 
             # Change state if there's nothing worth avoiding
             if not self.avoid:
@@ -231,31 +259,31 @@ class CentralControl:
                 # Take action based on where the object approximately is
                 if cx > MID_X:
                     # Right side
-                    self.car_controls.steering = -0.8
-                    cv.putText(scene, 'Go Left', (cx, cy), 0, 0.3, (0, 255, 255))
+                    self.car_controls.steering = LEFT_TURN_ANGLE
+                    cv.putText(scene, 'Go Left', (cx, cy), FONT, FONT_SCALE, YELLOW)
                 else:
                     # Left side
-                    self.car_controls.steering = 0.8
-                    cv.putText(scene, 'Go Right', (cx, cy), 0, 0.3, (0, 255, 255))
+                    self.car_controls.steering = RIGHT_TURN_ANGLE
+                    cv.putText(scene, 'Go Right', (cx, cy), FONT, FONT_SCALE, YELLOW)
             elif CCState.STREET_RULE in self.cc_state:
                 # Actions taken when in Street Rule mode
                 if self.stop_state == StopState.STOPPING:
-                    self.car_controls.brake = 1
-                    self.car_controls.throttle = 0
+                    self.car_controls.brake = HOLD_BRAKE
+                    self.car_controls.throttle = STOP_THROTTLE
 
-                    if self.speed < 0.001:
+                    if self.speed < STOPPED_SPEED:
                         # When you are stopped, you can start the resuming process
                         self.stop_state = StopState.RESUMING
                 elif self.stop_state == StopState.RESUMING:
                     # Stop breaking
-                    self.car_controls.brake = 0
+                    self.car_controls.brake = RELEASE_BRAKE
 
                     # Count down cooldown period
                     if not self.sign_data:
                         self.stop_cooldown -= 1
                     else:
                         # Reset count
-                        self.stop_cooldown = 8
+                        self.stop_cooldown = INITIAL_COOLDOWN
 
                     if self.stop_cooldown <= 0:
                         # Done the stop sign process
@@ -267,9 +295,9 @@ class CentralControl:
                 self.client.setCarControls(self.car_controls)
 
                 # Mark danger zones
-                cv.line(scene, (0, round(l_int)), (round(-l_int / l_slope), 0), (0, 0, 255), 3)  # Left
-                cv.line(scene, (639, round(639 * r_slope + r_int)), (round(-r_int / r_slope), 0), (0, 0, 255),
-                        3)  # Right
+                cv.line(scene, (0, round(l_int)), (round(-l_int / l_slope), 0), RED, LINE_THICKNESS)  # Left
+                cv.line(scene, (639, round(639 * r_slope + r_int)), (round(-r_int / r_slope), 0), RED,
+                        LINE_THICKNESS)  # Right
                 # Write debug image every two images
                 if self.tick % 2 == 0:
                     """
@@ -294,11 +322,11 @@ class CentralControl:
         grad_av_diff = sum(lane_data.gradient_diff) / len(lane_data.gradient_diff)
         hls_av_diff = sum(lane_data.hls_diff) / len(lane_data.hls_diff)
 
-        if grad_av_diff < hls_av_diff < 0.4:
+        if grad_av_diff < hls_av_diff < THRESHOLD:
             # Gradient is more reliable
             self.lka_lanes = lane_data.gradient_lane_bounds
             self.lane_status = LaneBoundStatus(lane_data.lane_gradient_status)
-        elif grad_av_diff < 0.4:
+        elif grad_av_diff < THRESHOLD:
             # HLS color thresholding is more reliable
             self.lka_lanes = lane_data.hls_lane_bounds
             self.lane_status = LaneBoundStatus(lane_data.lane_hls_status)
@@ -321,7 +349,7 @@ class CentralControl:
         self.next_road_segment = RoadWarning(navigation_data.next_segment)
 
         self.approachingIntersection = RoadWarning(navigation_data.next_segment) == RoadWarning.INTERSECTION_AHEAD or \
-                                   RoadSegmentType(navigation_data.current_segment) == RoadSegmentType.INTERSECTION
+                                       RoadSegmentType(navigation_data.current_segment) == RoadSegmentType.INTERSECTION
 
     def handle_throttling_data(self, throttling_data: Float64):
         self.car_controls.throttle = throttling_data.data
@@ -356,6 +384,7 @@ class CentralControl:
             all_aabbs.append(aabb)
 
         # These values can be changed to avoid obstacles that are farther from the car
+        # Point(x,y,z)
         car_aabb = AABB(
             min_point=Point(0.0, -1.0, 0.0),
             max_point=Point(10.0, 1.0, 2.0)
@@ -383,9 +412,9 @@ class CentralControl:
             # Lidar points are relative to the car. The "y" dimension, index 1, refers to left or right.
             # The "x" dimension, index 0, refers to the horizontal distance from the car.
             if closest_aabb_vector[1] > 0:
-                self.car_controls.steering = -(min(1.0, 0.125 / closest_aabb_vector[0]))
+                self.car_controls.steering = -(min(MAX_TURN_ANGLE, 0.125 / closest_aabb_vector[0]))
             elif closest_aabb_vector[1] < 0:
-                self.car_controls.steering = min(1.0, 0.125 / closest_aabb_vector[0])
+                self.car_controls.steering = min(MAX_TURN_ANGLE, 0.125 / closest_aabb_vector[0])
 
     def handle_object_recognition(self, res: DetectionResults):
         # Determine the "region" that the object falls into (all in front)

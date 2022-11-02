@@ -14,7 +14,7 @@ def setSpeed():
     rate = rospy.Rate(2) # 2 Hz
 
     # connect to the AirSim simulator 
-    client = airsim.CarClient()
+    client = airsim.CarClient(ip=host_ip)
     client.confirmConnection()
     client.enableApiControl(True)
     car_controls = airsim.CarControls()

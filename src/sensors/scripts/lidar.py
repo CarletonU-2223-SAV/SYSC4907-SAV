@@ -20,7 +20,7 @@ class Lidar:
 
         host_ip = rospy.get_param('/host_ip')
 
-        client = airsim.CarClient()
+        client = airsim.CarClient(ip=host_ip)
         client.confirmConnection()
 
         rate = rospy.Rate(30)
