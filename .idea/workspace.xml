@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="a3463961-f379-450c-a80f-fd80061e40dc" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/src/lane_keep_assist/lane_test/lane_detect_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/testing/PythonTests/lane_keep_assist/lane_detect_test.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lane_keep_assist/lane_test/take_picture.py" beforeDir="false" afterPath="$PROJECT_DIR$/testing/PythonTests/lane_keep_assist/take_picture.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lane_keep_assist/run_metrics.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/lane_keep_assist/run_metrics.py" afterDir="false" />
-    </list>
+    <list default="true" id="a3463961-f379-450c-a80f-fd80061e40dc" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
