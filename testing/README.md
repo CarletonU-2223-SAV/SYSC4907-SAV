@@ -1,6 +1,16 @@
-### Overview
+## Testing
 
-This folder contains the testing code for lidar obstacle detection and the PID controller for cruise control.
+### Unit Tests
+
+Unit tests of code that does not use the AirSim module can be placed in the PythonTests folder. Each subsystem should follow
+the `*_test.py` naming convention and contain a test class for each script in the subsystem. These classes must follow the
+`Test*` naming convention. `central_control_test.py` has an example of acceptable names. These tests are automatically executed
+on new pull requests and each time a new commit is added to master. Code in this directory can import files from anywhere
+in the project without specifying a full import path.
+
+### AirSim Performance Metrics
+
+The RosTests folder contains the testing code for lidar obstacle detection and the PID controller for cruise control.
 
 The organization of the project has changed since these tests were written, and so won't work out of the box. Furthermore,
 the metrics the sample tests calculate for lidar are out of date. Tests are included here for reference 
