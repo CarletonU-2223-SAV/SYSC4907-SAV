@@ -1,4 +1,9 @@
 from range import Range
+from point import Point
+from aabb import AABB
+from central_control import CentralControl
+from math import sqrt
+
 
 class TestRange:
     def test_overlaps(self):
@@ -9,3 +14,34 @@ class TestRange:
         assert range1.overlaps(range2)
         assert range2.overlaps(range3)
         assert not range1.overlaps(range3)
+
+
+class TestAABB:
+    def test_intersection(self):
+        aabb1 = AABB(Point(1, 3, 5), Point(4, 6, 8))
+        aabb2 = AABB(Point(3, 5, 7), Point(5, 7, 9))
+        aabb3 = AABB(Point(4, 6, 8), Point(7, 9, 11))
+
+        assert aabb1.intersection(aabb2)
+        assert aabb2.intersection(aabb3)
+        assert not aabb3.intersection(aabb1)
+
+    def test_vector_to_closest_point(self):
+        aabb1 = AABB(Point(3, -2, 5), Point(5, 1, 8))
+        aabb2 = AABB(Point(6, 10, 12), Point(9, 11, 15))
+
+        (distance_to_point1, vector_to_closest_point1) = aabb1.vector_to_closest_point([0, 0, 0])
+        (distance_to_point2, vector_to_closest_point2) = aabb2.vector_to_closest_point([0, 0, 0])
+
+        assert distance_to_point1 == sqrt(3 ** 2 + 1 ** 2 + 5 ** 2)
+        assert vector_to_closest_point1 == Point(3, 1, 5)
+        assert distance_to_point2 == sqrt(6 ** 2 + 10 ** 2 + 12 ** 2)
+        assert vector_to_closest_point2 == Point(6, 10, 12)
+
+
+class TestCentralControl:
+    def test_handle_speed(self):
+        cc = CentralControl()
+        cc.handle_speed(6.543257)
+
+        assert cc.speed == 6.543257
