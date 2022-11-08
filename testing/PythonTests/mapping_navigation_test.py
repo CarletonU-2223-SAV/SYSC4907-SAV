@@ -55,7 +55,7 @@ class TestRoute:
     def test_get_next_segment(self):
         route = Route()
         route.road_segments = [RoadSegment(Lane([Point((1, 1))]), 0)]
-        assert route.get_curr_segment() is None
+        assert route.get_next_segment() is None
         segment = RoadSegment(Lane([Point((2, 2))]), 1)
         route.road_segments.append(segment)
         assert route.get_next_segment() == segment
