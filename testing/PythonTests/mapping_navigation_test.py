@@ -48,22 +48,22 @@ class TestPurePursuit:
 class TestRoute:
     def test_get_curr_segment(self):
         route = Route()
-        segment = RoadSegment(Lane([Point((1, 1))]))
+        segment = RoadSegment(Lane([Point((1, 1))]), 0)
         route.road_segments = [segment]
         assert route.get_curr_segment() == segment
 
     def test_get_next_segment(self):
         route = Route()
-        route.road_segments = [RoadSegment(Lane([Point((1, 1))]))]
+        route.road_segments = [RoadSegment(Lane([Point((1, 1))]), 0)]
         assert route.get_curr_segment() is None
-        segment = RoadSegment(Lane([Point((2, 2))]))
+        segment = RoadSegment(Lane([Point((2, 2))]), 1)
         route.road_segments.append(segment)
         assert route.get_next_segment() == segment
 
     def test_next(self):
         route = Route()
-        segment1 = RoadSegment(Lane([Point((1, 1))]))
-        segment2 = RoadSegment(Lane([Point((2, 2))]))
+        segment1 = RoadSegment(Lane([Point((1, 1))]), 0)
+        segment2 = RoadSegment(Lane([Point((2, 2))]), 1)
         route.road_segments = [segment1, segment2]
         assert route.get_curr_segment() == segment1
         route.next()
