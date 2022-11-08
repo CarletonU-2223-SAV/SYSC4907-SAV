@@ -12,7 +12,7 @@ class Route:
         return self.road_segments[self.current_road_index]
 
     def get_next_segment(self) -> Optional[RoadSegment]:
-        if self.current_road_index == len(self.road_segments):
+        if (self.current_road_index + 1) >= len(self.road_segments):
             return None
         return self.road_segments[self.current_road_index + 1]
 
