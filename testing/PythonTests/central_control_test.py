@@ -28,15 +28,12 @@ class TestAABB:
 
     def test_vector_to_closest_point(self):
         aabb1 = AABB(Point(3, -2, 5), Point(5, 1, 8))
-        aabb2 = AABB(Point(6, 10, 12), Point(9, 11, 15))
+        aabb2 = AABB(Point(-4, 3, -3), Point(-1, 6, 1))
+        aabb3 = AABB(Point(6, 10, 12), Point(9, 11, 15))
 
-        (distance_to_point1, vector_to_closest_point1) = aabb1.vector_to_closest_point([0, 0, 0])
-        (distance_to_point2, vector_to_closest_point2) = aabb2.vector_to_closest_point([0, 0, 0])
-
-        assert distance_to_point1 == sqrt(3 ** 2 + 1 ** 2 + 5 ** 2)
-        assert vector_to_closest_point1 == Point(3, 1, 5)
-        assert distance_to_point2 == sqrt(6 ** 2 + 10 ** 2 + 12 ** 2)
-        assert vector_to_closest_point2 == Point(6, 10, 12)
+        assert aabb1.vector_to_closest_point([0, 0, 0]) == (sqrt(3 ** 2 + 1 ** 2 + 5 ** 2), [3, 1, 5])
+        assert aabb2.vector_to_closest_point([0, 0, 0]) == (sqrt((-1) ** 2 + 3 ** 2 + 1 ** 2), [-1, 3, 1])
+        assert aabb3.vector_to_closest_point([0, 0, 0]) == (sqrt(6 ** 2 + 10 ** 2 + 12 ** 2), [6, 10, 12])
 
 
 class TestCentralControl:
