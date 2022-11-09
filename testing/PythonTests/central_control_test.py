@@ -1,7 +1,6 @@
 from range import Range
 from point import Point
 from aabb import AABB
-from central_control import CentralControl
 from math import sqrt
 
 
@@ -31,14 +30,6 @@ class TestAABB:
         aabb2 = AABB(Point(-4, 3, -3), Point(-1, 6, 1))
         aabb3 = AABB(Point(6, 10, 12), Point(9, 11, 15))
 
-        assert aabb1.vector_to_closest_point([0, 0, 0]) == (sqrt(3 ** 2 + 1 ** 2 + 5 ** 2), [3, 1, 5])
-        assert aabb2.vector_to_closest_point([0, 0, 0]) == (sqrt((-1) ** 2 + 3 ** 2 + 1 ** 2), [-1, 3, 1])
-        assert aabb3.vector_to_closest_point([0, 0, 0]) == (sqrt(6 ** 2 + 10 ** 2 + 12 ** 2), [6, 10, 12])
-
-
-class TestCentralControl:
-    def test_handle_speed(self):
-        cc = CentralControl()
-        cc.handle_speed(6.543257)
-
-        assert cc.speed == 6.543257
+        assert aabb1.vector_to_closest_point() == (sqrt(3 ** 2 + 1 ** 2 + 5 ** 2), [3, 1, 5])
+        assert aabb2.vector_to_closest_point() == (sqrt((-1) ** 2 + 3 ** 2 + 1 ** 2), [-1, 3, 1])
+        assert aabb3.vector_to_closest_point() == (sqrt(6 ** 2 + 10 ** 2 + 12 ** 2), [6, 10, 12])

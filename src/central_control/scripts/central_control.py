@@ -398,7 +398,7 @@ class CentralControl:
 
         for aabb in all_aabbs:
             if car_aabb.intersection(aabb):
-                (distance, vector_to_closest_point) = aabb.vector_to_closest_point([0, 0, 0])
+                (distance, vector_to_closest_point) = aabb.vector_to_closest_point()
 
                 if closest_aabb_vector is None:
                     closest_aabb_vector = vector_to_closest_point

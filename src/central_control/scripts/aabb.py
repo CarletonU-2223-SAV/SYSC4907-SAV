@@ -17,7 +17,7 @@ class AABB:
 
     # Get the vector to the point that is closest to the passed in point.
     # Returns the distance to that point and the vector to it
-    def vector_to_closest_point(self, pos: [float]) -> (float, [float]):
+    def vector_to_closest_point(self) -> (float, [float]):
         aabb_corner_points = self.get_all_points()
 
         # Assume at the beginning that the closest point is extremely far away
