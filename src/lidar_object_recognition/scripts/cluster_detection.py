@@ -5,6 +5,13 @@ import os
 import rospy
 from geometry_msgs.msg import Point32
 
+default_min_x = 1e+308
+default_max_x = -1e+308
+default_min_y = 1e+308
+default_max_y = -1e+308
+default_min_z = 1e+308
+default_max_z = -1e+308
+
 
 # Determine clusters in a point cloud, and derives bounding boxes from those point clouds
 class ClusterDetection:
@@ -78,14 +85,14 @@ class ClusterDetection:
         # Max value of floats ensures that when iterating over points of the
         # bounding box, the points that comprise the box will be modified to
         # reflect the true min and max of the box
-        min_x = 1e+308
-        max_x = -1e+308
+        min_x = default_min_x
+        max_x = default_max_x
 
-        min_y = 1e+308
-        max_y = -1e+308
+        min_y = default_min_y
+        max_y = default_max_y
 
-        min_z = 1e+308
-        max_z = -1e+308
+        min_z = default_min_z
+        max_z = default_max_z
 
         for p in points:
             min_x = min(p[0], min_x)
