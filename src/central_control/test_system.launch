@@ -1,0 +1,7 @@
+<launch>
+  <arg name="path" />
+
+  <include file="$(dirname)/full_system.launch">
+    <arg name="pathfile" value="$(arg path)" />
+  </include>
+</launch>
