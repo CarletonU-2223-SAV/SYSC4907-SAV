@@ -1,4 +1,4 @@
-name: Simulated Autonomous Vehicle
+name: Python Unit Tests
 
 on:
   pull_request:
