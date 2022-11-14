@@ -11,7 +11,7 @@ TEST_CASES = [
 
 
 def analyze(test_case: str):
-    filepath = Path(__file__) / 'log' / f'{test_case}.txt'
+    filepath = Path(__file__).parent / 'log' / f'{test_case}.txt'
     with open(filepath, 'r') as f:
         date = f.readline().rstrip()
         delta = (datetime.now() - datetime.strptime(date, '%Y-%m-%d %H:%M:%S')).days
