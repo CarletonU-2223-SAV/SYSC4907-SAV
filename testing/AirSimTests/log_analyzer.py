@@ -1,6 +1,7 @@
+import sys
 from datetime import datetime
 from math import pow, sqrt
-import sys
+from pathlib import Path
 
 TEST_CASES = [
     'left_turn',
@@ -10,7 +11,8 @@ TEST_CASES = [
 
 
 def analyze(test_case: str):
-    with open(f'log/{test_case}.txt', 'r') as f:
+    filepath = Path(__file__) / 'log' / f'{test_case}.txt'
+    with open(filepath, 'r') as f:
         date = f.readline().rstrip()
         delta = (datetime.now() - datetime.strptime(date, '%Y-%m-%d %H:%M:%S')).days
         if delta > 7:
