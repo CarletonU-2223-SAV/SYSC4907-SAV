@@ -68,6 +68,6 @@ executables for MacOS and only some for Linux.
     > 
     > Afterwards, click the first "empty path" label to the right of the map. Then click all of the created points on the map. 
     > 
-    > Create an empty path file somewhere on the file system, ending with the ".pickle" file extension. Then click "File", "save map", and select the created pickle file.
-    > 
-    > Finally, go to the mapping_navigation/src/scripts/navigation.py file, go to the main function and set the map variable to the location of the created pickle file
+    > Click "File", "save map", and create a new file under the src/mapping_navigation/paths directory.
+
+3. To use the new test route, add the path argument to the end of the roslaunch command: `roslaunch central_control full_system.launch path:=new_coords.pickle`
