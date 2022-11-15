@@ -2,6 +2,7 @@
 
 import rospy
 import os
+from pathlib import Path as Filepath
 from geometry_msgs.msg import PoseStamped
 from pure_pursuit import *
 from std_msgs.msg import Float64
@@ -109,8 +110,9 @@ class Navigation:
 
 # Can use either of the path methods by uncommenting one or the other if you want to test with the old path
 if __name__ == "__main__":
-
-    map = load_from_file(os.path.abspath(os.path.dirname(__file__)) + "/new_coords.pickle")
+    path_file = rospy.get_param('/path_file')
+    path = Filepath(__file__).parent.parent / 'paths' / path_file
+    map = load_from_file(path)
     # Assuming one path for the moment unless we plan on adding multiple per map in the future
     created_path = map.convert_path(0)
 
