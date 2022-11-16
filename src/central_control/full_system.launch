@@ -2,6 +2,9 @@
   <arg name="host" default="127.0.0.1" />
   <param name="/host_ip" type="string" value="$(arg host)" /> <!-- set global host_ip param -->
 
+  <arg name="path" default="new_coords.pickle" />
+  <param name="/path_file" type="string" value="$(arg path)" /> <!-- set path to vehicle's path file -->
+
   <node name="central_control" pkg="central_control" type="central_control.py" />
   <node name="lane_keep_assist" pkg="lane_keep_assist" type="send_lane.py" />
 
