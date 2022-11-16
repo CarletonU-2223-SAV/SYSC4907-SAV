@@ -6,7 +6,7 @@ default_min_z = 1e+308
 default_max_z = -1e+308
 
 
-def find_aabb(self, points: [float], result: [float]):
+def find_aabb(points: [float], result: [float]):
     # Max value of floats ensures that when iterating over points of the
     # bounding box, the points that comprise the box will be modified to
     # reflect the true min and max of the box
