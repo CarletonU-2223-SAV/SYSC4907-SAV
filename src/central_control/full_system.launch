@@ -5,6 +5,8 @@
   <arg name="path" default="new_coords.pickle" />
   <param name="/path_file" type="string" value="$(arg path)" /> <!-- set path to vehicle's path file -->
 
+  <arg name="log" default="false" />
+
   <node name="central_control" pkg="central_control" type="central_control.py" />
   <node name="lane_keep_assist" pkg="lane_keep_assist" type="send_lane.py" />
 
@@ -24,4 +26,5 @@
   <node name="car_image_raw" pkg="sensors" type="car_image_raw.py" />
   <node name="car_pose" pkg="sensors" type="car_pose.py" />
   <node name="segmented_image" pkg="sensors" type="segmented_image.py" />
+  <node name="logging" pkg="sensors" type="logging.py" if="$(arg log)" /> <!-- Launch logging node if flag is set -->
 </launch>

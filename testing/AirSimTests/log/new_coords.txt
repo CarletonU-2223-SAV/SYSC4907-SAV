@@ -1,0 +1,4 @@
+2022-11-20 23:44:20
+steering -1.1057556867599487
+acceleration 0.9972274303436279
+collisions False
