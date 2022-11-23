@@ -1,4 +1,5 @@
 import json
+import os
 import pickle
 from tkinter import filedialog as fd
 from Models import RoadSegment, RoadSegmentType, Lane, MapModel
@@ -7,7 +8,8 @@ from typing import Dict, List
 
 # Responsible for saving/loading a road_segments dict to/from a json file
 def save_to_file(map_model: MapModel):
-    filename = fd.askopenfilename(initialdir='.')
+    filename = fd.askopenfilename(initialdir=os.path.normpath(os.getcwd() + os.sep + os.pardir)+"/paths",
+                                  title="Select file")
     outfile = open(filename, 'wb')
 
     pickle.dump(map_model, outfile)
@@ -16,7 +18,8 @@ def save_to_file(map_model: MapModel):
 
 # load from save file
 def load_from_file() -> MapModel:
-    filename = fd.askopenfilename(initialdir='.')
+    filename = fd.askopenfilename(initialdir=os.path.normpath(os.getcwd() + os.sep + os.pardir)+"/paths",
+                                  title="Select file")
     infile = open(filename, 'rb')
     map_model: MapModel = pickle.load(infile)
 

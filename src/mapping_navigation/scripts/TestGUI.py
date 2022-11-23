@@ -2,7 +2,6 @@
 import tkinter as tk
 from enum import Enum
 import MapSerializer as MS
-import PIL
 from PIL import ImageTk, Image
 from Models import RoadSegment, RoadSegmentType, MapModel, Lane, Connection, Path, Point
 import os
@@ -40,6 +39,18 @@ def handle_load():
     rerender_paths_panel()
 
 
+CITY = 1
+NH = 2
+
+
+# Updates the canvas image
+def update_canvas(img_choice: int):
+    if img_choice == CITY:
+        canvas.itemconfig(canvas_container, image=img[0])
+    elif img_choice == NH:
+        canvas.itemconfig(canvas_container, image=img[1])
+
+
 # Add point if lane is selected
 def handle_canvas_m1(event):
     x, y = event.x, event.y
@@ -55,16 +66,16 @@ def handle_canvas_m1(event):
         overlap_size: int = 3
         if selected_path_id != -1:
             # Get point_id and coordinates of point clicked
-            found_ids: Tuple[int] = canvas.find_overlapping(x-overlap_size, y-overlap_size,
-                                                            x+overlap_size, y+overlap_size)
+            found_ids: Tuple[int] = canvas.find_overlapping(x - overlap_size, y - overlap_size,
+                                                            x + overlap_size, y + overlap_size)
             if len(found_ids) < 2:
                 # Didn't click a point
                 return
 
             point_id: int = found_ids[-1]
             coords = canvas.coords(point_id)
-            x = (coords[0] + coords[2])/2
-            y = (coords[1] + coords[3])/2
+            x = (coords[0] + coords[2]) / 2
+            y = (coords[1] + coords[3]) / 2
 
             clicked_point = Point(x, y, point_id)
             # Get segment id
@@ -92,7 +103,7 @@ def handle_canvas_m3(event):
     overlap_size: int = 3
     x, y = event.x, event.y
     # list of object ids in box
-    points: tuple = canvas.find_overlapping(x-overlap_size, y-overlap_size, x+overlap_size, y+overlap_size)
+    points: tuple = canvas.find_overlapping(x - overlap_size, y - overlap_size, x + overlap_size, y + overlap_size)
     # Clicked a point
     if len(points) > 0 and points[-1] != 1:
         # id of point to remove
@@ -118,9 +129,9 @@ def get_point_data(point_id) -> tuple:
 
 
 # Size is radius, returns id of point
-def draw_point(x, y, tags: Union[str, Tuple], size: int = 3) -> int:
+def draw_point(x, y, tags: Union[str, Tuple], size: int = 2) -> int:
     # include tag of segment_id
-    return canvas.create_oval(x-size, y-size, x+size, y+size, fill='red', outline='yellow', tags=tags)
+    return canvas.create_oval(x - size, y - size, x + size, y + size, fill='red', outline='yellow', tags=tags)
 
 
 # clear existing highlights
@@ -351,6 +362,7 @@ def highlight_lane_points():
         else:
             canvas.itemconfigure(pid, outline='yellow')
 
+
 # TODO: delete lane?
 
 
@@ -372,6 +384,37 @@ def init_menu_bar():
     # Menu bar
     menubar = tk.Menu(window)
     window.config(menu=menubar)
+
+    # File menu
+    file_menu = tk.Menu(menubar, tearoff=False)
+    file_menu.add_command(
+        label='save coords',
+        command=lambda: MS.save_to_file(map_model)
+    )
+    file_menu.add_command(
+        label='load coords',
+        command=handle_load
+    )
+    menubar.add_cascade(
+        label='File',
+        menu=file_menu
+    )
+
+    # Maps Menu
+    maps_menu = tk.Menu(menubar, tearoff=False)
+    maps_menu.add_command(
+        label='City',
+        command=lambda: update_canvas(CITY)
+    )
+    maps_menu.add_command(
+        label='NH',
+        command=lambda: update_canvas(NH)
+    )
+    menubar.add_cascade(
+        label='Maps',
+        menu=maps_menu
+    )
+
     # Create menu
     create_menu = tk.Menu(menubar, tearoff=False)
     create_menu.add_command(
@@ -397,20 +440,6 @@ def init_menu_bar():
     menubar.add_cascade(
         label='Create',
         menu=create_menu
-    )
-    # File menu
-    file_menu = tk.Menu(menubar, tearoff=False)
-    file_menu.add_command(
-        label='save map',
-        command=lambda: MS.save_to_file(map_model)
-    )
-    file_menu.add_command(
-        label='load map',
-        command=handle_load
-    )
-    menubar.add_cascade(
-        label='File',
-        menu=file_menu
     )
 
     # Mode menu
@@ -450,9 +479,10 @@ window.title("Map creator")
 init_menu_bar()
 
 # Canvas
-img = ImageTk.PhotoImage(Image.open('NH_Top.png'))
-h = img.height()
-w = img.width()
+img = [ImageTk.PhotoImage(Image.open('AirSim_maps/City_Top.png')),
+       ImageTk.PhotoImage(Image.open('AirSim_maps/NH_Top.png'))]
+h = img[0].height()
+w = img[0].width()
 
 # Road segments panel
 seg_frame = tk.Frame(master=window)
@@ -465,7 +495,7 @@ label_b = tk.Label(master=path_frame, text='no paths yet')
 label_b.pack()
 
 canvas = tk.Canvas(window, width=w, height=h)
-canvas.create_image(0, 0, image=img, anchor='nw')
+canvas_container = canvas.create_image(0, 0, image=img[0], anchor='nw')
 canvas.pack(side="left", fill="both", expand="yes")
 # Canvas event handlers
 canvas.bind("<Button-1>", handle_canvas_m1)
