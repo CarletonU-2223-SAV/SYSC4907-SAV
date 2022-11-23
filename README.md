@@ -66,8 +66,10 @@ executables for MacOS and only some for Linux.
 
     > In the GUI, click "Create" followed by "straight road". Then click the new "RoadSegmentType.STRAIGHT" label to the right of the map. Then click "Create" follwed by "lane". Then click the new "[]" label under the previously selected RoadSegementType label. Then click "Create" then "path".  Now start clicking points on the map to add points. Repeat these steps for intersections and other paths that do not involve intersections.
     > 
+    > **IMPORTANT**: Make sure your first point is where the vehicle starts in the AirSim environment
+    > 
     > Afterwards, click the first "empty path" label to the right of the map. Then click all of the created points on the map. 
     > 
-    > Click "File", "save map", and create a new file under the src/mapping_navigation/paths directory.
+    > Click "File", "save coords", and create a new file under the src/mapping_navigation/paths directory.
 
 3. To use the new test route, add the path argument to the end of the roslaunch command: `roslaunch central_control full_system.launch path:=new_coords.pickle`

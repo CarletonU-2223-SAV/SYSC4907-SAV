@@ -5,6 +5,8 @@ from typing import List, Dict, Tuple
 
 X_COORD = 0
 Y_COORD = 1
+NH = 0
+CITY = 1
 
 
 # Model a point on the canvas
@@ -124,8 +126,8 @@ class Path:
 class MapModel:
     # Semantic versioning: Major.Minor.Patch
     version: str = '0.1.0'
-    NH_scale_factor: float = 4.33564  # Calculated using collected points on the map
-    NH_correction_factor: Tuple[int, int] = (-645, -573)
+    AirSim_scale_factor: Tuple[float] = [4.33564, 2.046295]  # Calculated using collected points on the map
+    AirSim_correction_factor: List[List[int]] = [[-645, -573], [-614, -589]]  # Start points of vehicles in environments
 
     def __init__(self):
         self.curr_id: int = 0
@@ -148,12 +150,14 @@ class MapModel:
     def delete_path(self, index):
         del self.paths[index]
 
-    # Use NH map correction factors. Implement other maps dynamically later?
-    def convert_point(self, point: Point) -> Tuple[float, float]:
+    # Use NH/City map correction factors.
+    def convert_point(self, point: Point, map_choice: int) -> Tuple[float, float]:
         # re-centering correction factor
-        c1 = (point.x + MapModel.NH_correction_factor[X_COORD], point.y + MapModel.NH_correction_factor[Y_COORD])
+        c1 = (point.x + MapModel.AirSim_correction_factor[map_choice][X_COORD],
+              point.y + MapModel.AirSim_correction_factor[map_choice][Y_COORD])
         # scale correction
-        c2 = (c1[X_COORD]/MapModel.NH_scale_factor, c1[Y_COORD]/MapModel.NH_scale_factor)
+        c2 = (c1[X_COORD] / MapModel.AirSim_scale_factor[map_choice],
+              c1[Y_COORD] / MapModel.AirSim_scale_factor[map_choice])
         # weird inversion correction due to the AirSim map being "upside-down"
         return -c2[Y_COORD], c2[X_COORD]
 
@@ -166,9 +170,23 @@ class MapModel:
         if sel_path.empty():
             pass
 
+        # choose between AirSim environments based off starting point of given path
+        # and start point of vehicle in environment
+        x_points_path = [point.x for conn, point in sel_path.connections]
+        x_startpoint_path = x_points_path[0]
+        x_startpoint_nh = -1 * MapModel.AirSim_correction_factor[NH][X_COORD]
+        x_startpoint_city = -1 * MapModel.AirSim_correction_factor[CITY][X_COORD]
+
+        if abs(x_startpoint_path - x_startpoint_nh) < 10:
+            map_choice = NH
+        elif abs(x_startpoint_path - x_startpoint_city) < 10:
+            map_choice = CITY
+        else:
+            map_choice = NH
+
         # Iterate through points in the path
         for con, p in sel_path.connections:
-            converted_point = self.convert_point(p)
+            converted_point = self.convert_point(p, map_choice)
 
             segment_type = RoadSegmentType.STRAIGHT
             if con.from_seg_id is not None:
