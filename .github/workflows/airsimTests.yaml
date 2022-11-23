@@ -18,18 +18,5 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: "3.8"
-      - name: Left turn
-        if: success() || failure()
-        run: python testing/AirSimTests/log_analyzer.py left_turn
-      - name: Right turn
-        if: success() || failure()
-        run: python testing/AirSimTests/log_analyzer.py right_turn
-      - name: Straight
-        if: success() || failure()
-        run: python testing/AirSimTests/log_analyzer.py straight
-      - name: U-Turn
-        if: success() || failure()
-        run: python testing/AirSimTests/log_analyzer.py u_turn
-      - name: Too many args
-        if: success() || failure()
-        run: python testing/AirSimTests/log_analyzer.py left_turn right_turn straight
+      - name: Sample test
+        run: python testing/AirSimTests/log_analyzer.py new_coords
