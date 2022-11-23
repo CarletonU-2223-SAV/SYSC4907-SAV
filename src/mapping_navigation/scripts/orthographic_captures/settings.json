@@ -1,0 +1,17 @@
+{
+  "SeeDocsAt": "https://github.com/Microsoft/AirSim/blob/master/docs/settings.md",
+  "SettingsVersion": 1.2,
+  "SimMode": "ComputerVision",
+  "ViewMode": "NoDisplay",
+  "CameraDefaults": {
+    "CaptureSettings": [
+      {
+        "ImageType": 0,
+        "Width": 1228,
+        "Height": 1176,
+        "ProjectionMode": "orthographic",
+        "OrthoWidth": 600.0
+      }
+    ]
+  }
+}
