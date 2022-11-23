@@ -15,16 +15,17 @@ class Logging:
         self.rate = rospy.Rate(1)  # 1 Hz
         self.max_steering = 0
         self.max_acc = 0
+        self.path = []
 
     def log(self):
         while not rospy.is_shutdown():
             car_controls = self.client.getCarControls()
             self.max_steering = max(car_controls.steering, self.max_steering, key=abs)
             self.max_acc = max(car_controls.throttle, self.max_acc, key=abs)
+            self.path.append(self.client.getCarState().kinematics_estimated.position)
             self.rate.sleep()
 
     def write_log(self):
-        car_state = self.client.getCarState()
         collisions = self.client.simGetCollisionInfo()
 
         path_file: str = rospy.get_param('/path_file')
@@ -36,6 +37,7 @@ class Logging:
             f.write(f'steering {self.max_steering}\n')
             f.write(f'acceleration {self.max_acc}\n')
             f.write(f'collisions {collisions.has_collided}\n')
+            f.write(f'path {",".join([str(x) for x in self.path])}')
 
 
 if __name__ == '__main__':
