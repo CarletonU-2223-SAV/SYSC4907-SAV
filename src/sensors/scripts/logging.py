@@ -1,7 +1,9 @@
 import rospy
 import airsim
+from airsim.types import Vector3r
 from pathlib import Path
 from datetime import datetime
+from typing import List
 
 
 class Logging:
@@ -15,7 +17,7 @@ class Logging:
         self.rate = rospy.Rate(1)  # 1 Hz
         self.max_steering = 0
         self.max_acc = 0
-        self.path = []
+        self.path: List[Vector3r] = []
 
     def log(self):
         while not rospy.is_shutdown():
@@ -37,7 +39,8 @@ class Logging:
             f.write(f'steering {self.max_steering}\n')
             f.write(f'acceleration {self.max_acc}\n')
             f.write(f'collisions {collisions.has_collided}\n')
-            f.write(f'path {",".join([str(x) for x in self.path])}')
+            coords = "|".join([f'{x.x_val},{x.y_val},{x.z_val}' for x in self.path])
+            f.write(f'path {coords}')
 
 
 if __name__ == '__main__':
