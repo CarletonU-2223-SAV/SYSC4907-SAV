@@ -8,8 +8,10 @@ from typing import Dict, List
 
 # Responsible for saving/loading a road_segments dict to/from a json file
 def save_to_file(map_model: MapModel):
-    filename = fd.askopenfilename(initialdir=os.path.normpath(os.getcwd() + os.sep + os.pardir)+"/paths",
-                                  title="Select file")
+    filename = fd.asksaveasfilename(initialdir=os.path.normpath(os.getcwd() + os.sep + os.pardir)+"/paths",
+                                    defaultextension=".pickle",
+                                    filetypes=(("Pickle file", "*.pickle"), ("All files", "*.*")),
+                                    title="Select path as...")
     outfile = open(filename, 'wb')
 
     pickle.dump(map_model, outfile)
