@@ -11,7 +11,7 @@ def save_to_file(map_model: MapModel):
     filename = fd.asksaveasfilename(initialdir=os.path.normpath(os.getcwd() + os.sep + os.pardir)+"/paths",
                                     defaultextension=".pickle",
                                     filetypes=(("Pickle file", "*.pickle"), ("All files", "*.*")),
-                                    title="Select path as...")
+                                    title="Save path as...")
     outfile = open(filename, 'wb')
 
     pickle.dump(map_model, outfile)
