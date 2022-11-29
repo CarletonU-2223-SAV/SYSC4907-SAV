@@ -21,10 +21,20 @@
    <!-- Making navigation node required results in ROS shutting down after the entire path has been navigated.
         This is needed for automated testing. -->
   <node name="navigation" pkg="mapping_navigation" type="navigation.py" required = "true"/>
+  <node name="Ros_nav" pkg="Ros_nav" type="Ros_nav.py" />
 
   <node name="lidar" pkg="sensors" type="lidar.py" />
   <node name="car_image_raw" pkg="sensors" type="car_image_raw.py" />
   <node name="car_pose" pkg="sensors" type="car_pose.py" />
   <node name="segmented_image" pkg="sensors" type="segmented_image.py" />
   <node name="logging" pkg="sensors" type="logging.py" if="$(arg log)" /> <!-- Launch logging node if flag is set -->
+  <!--<node pkg="sensor_node_pkg" type="sensor_node_type" name="sensor_node_name" output="screen">
+    <param name="sensor_param" value="param_value" />
+  </node>
+  <node pkg="odom_node_pkg" type="odom_node_type" name="odom_node" output="screen">
+    <param name="odom_param" value="param_value" />
+  </node>
+  <node pkg="transform_configuration_pkg" type="transform_configuration_type" name="transform_configuration_name" output="screen">
+    <param name="transform_configuration_param" value="param_value" />
+  </node>--> <!-- This is the waiting to be implemented-->
 </launch>
