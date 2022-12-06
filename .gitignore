@@ -20,3 +20,6 @@ catkin_ws/*.pyc
 src/cruise_control/scripts/speed_output.txt
 .idea
 
+.vs/slnx.sqlite
+.vs/SYSC4907-SAV/v16/.suo
+.vs/VSWorkspaceState.json
