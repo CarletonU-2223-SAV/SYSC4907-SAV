@@ -27,7 +27,6 @@
   <node name="car_image_raw" pkg="sensors" type="car_image_raw.py" />
   <node name="car_pose" pkg="sensors" type="car_pose.py" />
   <node name="segmented_image" pkg="sensors" type="segmented_image.py" />
-  <node name="logging" pkg="sensors" type="logging.py" if="$(arg log)" /> <!-- Launch logging node if flag is set -->
   <!--<node pkg="sensor_node_pkg" type="sensor_node_type" name="sensor_node_name" output="screen">
     <param name="sensor_param" value="param_value" />
   </node>
@@ -37,4 +36,5 @@
   <node pkg="transform_configuration_pkg" type="transform_configuration_type" name="transform_configuration_name" output="screen">
     <param name="transform_configuration_param" value="param_value" />
   </node>--> <!-- This is the waiting to be implemented-->
+  <node name="logging" pkg="sensors" type="vehicle_logging.py" if="$(arg log)" /> <!-- Launch logging node if flag is set -->
 </launch>
