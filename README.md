@@ -73,3 +73,5 @@ executables for MacOS and only some for Linux.
     > Click "File", "save coords", and create a new file under the src/mapping_navigation/paths directory.
 
 3. To use the new test route, add the path argument to the end of the roslaunch command: `roslaunch central_control full_system.launch path:=new_coords.pickle`
+
+4. To obtain orthographic captures (two-dimensional views of three-dimensional objects) in any AirSim Environment, go to src/mapping_navigation/scripts/orthographic_captures and read instructions in aerial_capture.py. Currently only captures aerial images 
