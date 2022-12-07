@@ -2,8 +2,8 @@ import sys
 from datetime import datetime
 from pathlib import Path
 from typing import List, Tuple
-import src.mapping_navigation.scripts.MapSerializer as MapSerializer
-from src.mapping_navigation.scripts.Models import Point
+import MapSerializer as MapSerializer
+from Models import Point
 from PIL import Image, ImageDraw, ImageColor
 
 
