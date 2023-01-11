@@ -26,6 +26,4 @@ jobs:
       - name: Sample test
         run: python testing/AirSimTests/log_analyzer.py NH_new_coords
         env:
-          PYTHONPATH: $PYTHONPATH; $GITHUB_WORKSPACE/src/central_control/scripts; $GITHUB_WORKSPACE/src/cruise_control/scripts; \
-            $GITHUB_WORKSPACE/src/lane_keep_assist/scripts; $GITHUB_WORKSPACE/src/lidar_object_recognition/scripts; \
-            $GITHUB_WORKSPACE/src/mapping_navigation/scripts; $GITHUB_WORKSPACE/src/sensors/scripts; $GITHUB_WORKSPACE/src/sign_car_recognition/scripts
+          PYTHONPATH: $PYTHONPATH:$GITHUB_WORKSPACE/src/central_control/scripts:$GITHUB_WORKSPACE/src/cruise_control/scripts:$GITHUB_WORKSPACE/src/lane_keep_assist/scripts:$GITHUB_WORKSPACE/src/lidar_object_recognition/scripts:$GITHUB_WORKSPACE/src/mapping_navigation/scripts:$GITHUB_WORKSPACE/src/sensors/scripts:$GITHUB_WORKSPACE/src/sign_car_recognition/scripts
