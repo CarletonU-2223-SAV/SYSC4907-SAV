@@ -21,7 +21,8 @@ jobs:
       - name: Set up Pythonpath
         run: |
           echo "PYTHONPATH=${PYTHONPATH}:/home/runner/work/SYSC4907-SAV/src/central_control/scripts:/home/runner/work/SYSC4907-SAV/src/cruise_control/scripts:/home/runner/work/SYSC4907-SAV/src/lane_keep_assist/scripts:/home/runner/work/SYSC4907-SAV/src/lidar_object_recognition/scripts:/home/runner/work/SYSC4907-SAV/src/mapping_navigation/scripts:/home/runner/work/SYSC4907-SAV/src/sensors/scripts:/home/runner/work/SYSC4907-SAV/src/sign_car_recognition/scripts" >> $GITHUB_ENV
-          echo ${PYTHONPATH}
+      - name: test
+        run: echo ${PYTHONPATH}
       - name: Sample test
         run: python testing/AirSimTests/log_analyzer.py NH_new_coords
         env:
