@@ -20,7 +20,7 @@ jobs:
           python-version: "3.8"
       - name: Set up Pythonpath
         run: |
-          echo "PYTHONPATH=${PYTHONPATH}:/home/runner/work/SYSC4907-SAV/src/central_control/scripts:/home/runner/work/SYSC4907-SAV/src/cruise_control/scripts:/home/runner/work/SYSC4907-SAV/src/lane_keep_assist/scripts:/home/runner/work/SYSC4907-SAV/src/lidar_object_recognition/scripts:/home/runner/work/SYSC4907-SAV/src/mapping_navigation/scripts:/home/runner/work/SYSC4907-SAV/src/sensors/scripts:/home/runner/work/SYSC4907-SAV/src/sign_car_recognition/scripts" >> $GITHUB_ENV
+          echo "PYTHONPATH=${PYTHONPATH}:${GITHUB_WORKSPACE}/src/central_control/scripts:${GITHUB_WORKSPACE}/src/cruise_control/scripts:${GITHUB_WORKSPACE}/src/lane_keep_assist/scripts:${GITHUB_WORKSPACE}/src/lidar_object_recognition/scripts:${GITHUB_WORKSPACE}/src/mapping_navigation/scripts:${GITHUB_WORKSPACE}/src/sensors/scripts:${GITHUB_WORKSPACE}/src/sign_car_recognition/scripts" >> $GITHUB_ENV
       - name: test
         run: echo ${PYTHONPATH}
       - name: Sample test
