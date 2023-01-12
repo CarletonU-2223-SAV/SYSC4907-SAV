@@ -19,6 +19,19 @@ class Point:
     def update_pid(self, pid):
         self.pid = pid
 
+    def point_to_gui_coords(self, map_choice: int) -> Tuple[float, float]:
+        # weird inversion correction due to the AirSim map being "upside-down"
+        x, y = self.y, -self.x
+
+        # scale correction
+        c1 = (x * MapModel.AirSim_scale_factor[map_choice],
+              y * MapModel.AirSim_scale_factor[map_choice])
+        # re-centering correction factor
+        c2 = (c1[X_COORD] - MapModel.AirSim_correction_factor[map_choice][X_COORD],
+              c1[Y_COORD] - MapModel.AirSim_correction_factor[map_choice][Y_COORD])
+
+        return c2
+
     def __str__(self):
         return f'{(self.x, self.y, self.pid)}'
 
@@ -121,6 +134,12 @@ class Path:
 
     def empty(self):
         return not self.connections
+
+    def get_gui_coords(self) -> List[Tuple[float, float]]:
+        out = [(connection.from_point.x, connection.from_point.y) for connection, _ in self.connections]
+        last_point = self.connections[-1][1]  # Do last point separately as it doesn't have a connection
+        out.append((last_point.x, last_point.y))
+        return out
 
 
 class MapModel:

@@ -22,6 +22,10 @@ def save_to_file(map_model: MapModel):
 def load_from_file() -> MapModel:
     filename = fd.askopenfilename(initialdir=os.path.normpath(os.getcwd() + os.sep + os.pardir)+"/paths",
                                   title="Select file")
+    return load_from_filename(filename)
+
+
+def load_from_filename(filename: str) -> MapModel:
     infile = open(filename, 'rb')
     map_model: MapModel = pickle.load(infile)
 

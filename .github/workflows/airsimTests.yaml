@@ -18,5 +18,12 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: "3.8"
+      - name: Set up Pythonpath
+        run: |
+          echo "PYTHONPATH=${PYTHONPATH}:${GITHUB_WORKSPACE}/src/central_control/scripts:${GITHUB_WORKSPACE}/src/cruise_control/scripts:${GITHUB_WORKSPACE}/src/lane_keep_assist/scripts:${GITHUB_WORKSPACE}/src/lidar_object_recognition/scripts:${GITHUB_WORKSPACE}/src/mapping_navigation/scripts:${GITHUB_WORKSPACE}/src/sensors/scripts:${GITHUB_WORKSPACE}/src/sign_car_recognition/scripts" >> $GITHUB_ENV
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install Pillow
       - name: Sample test
-        run: python testing/AirSimTests/log_analyzer.py new_coords
+        run: python testing/AirSimTests/log_analyzer.py NH_new_coords

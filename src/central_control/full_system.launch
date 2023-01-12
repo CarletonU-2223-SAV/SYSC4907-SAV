@@ -38,4 +38,5 @@
   <node pkg="transform_configuration_pkg" type="transform_configuration_type" name="transform_configuration_name" output="screen">
     <param name="transform_configuration_param" value="param_value" />
   </node>--> <!-- This is the waiting to be implemented-->
+  <node name="logging" pkg="sensors" type="vehicle_logging.py" if="$(arg log)" /> <!-- Launch logging node if flag is set -->
 </launch>
