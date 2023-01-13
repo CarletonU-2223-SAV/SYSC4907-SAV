@@ -46,8 +46,7 @@ def analyze_collisions(data: Dict[str, any]):
         if collision_detected:
             start_time = data[DATE][0]
             collision_time = data[DATE][i]
-            delta = (datetime.strptime(collision_time, '%Y-%m-%d %H:%M:%S')
-                     - datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S'))
+            delta = collision_time - start_time
             raise Exception(f'Collision detected at {data[DATE][i]} (after {delta.seconds} seconds).')
 
 
@@ -76,13 +75,13 @@ def analyze(test_case: str):
         env = f.readline().strip()
         for line in f:
             line = line.strip()
-            time, pos, steering, throttle, collisions = line.split('|')
+            time, pos, steering, throttle, collision = line.split('|')
             x, y = [float(z) for z in pos.split(',')]
             line_pt = Point(x, y, 0)
-            data[DATE].append(time)
+            data[DATE].append(datetime.strptime(time, '%Y-%m-%d %H:%M:%S'))
             data[POS_GUI].append(line_pt.point_to_gui_coords(ENV_IDS[env]))
             data[POS_AIRSIM].append((x, y))
-            data[COLLISIONS].append(collisions)
+            data[COLLISIONS].append(collision == 'True')
 
     pickle_path = [(x, y) for x, y, _ in pickle_map.convert_path(0)]
     analyze_path(data[POS_AIRSIM], pickle_path)
