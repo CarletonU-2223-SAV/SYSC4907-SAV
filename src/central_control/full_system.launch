@@ -21,7 +21,6 @@
    <!-- Making navigation node required results in ROS shutting down after the entire path has been navigated.
         This is needed for automated testing. -->
   <node name="navigation" pkg="mapping_navigation" type="navigation.py" required = "true"/>
-  <!--<node name="Ros_nav" pkg="Ros_nav" type="Ros_nav.py" />-->
 
   <node name="lidar" pkg="sensors" type="lidar.py" />
   <node name="car_image_raw" pkg="sensors" type="car_image_raw.py" />
