@@ -1,11 +1,10 @@
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 import MapSerializer as MapSerializer
 from Models import Point
 from PIL import Image, ImageDraw, ImageColor
-
 
 MAX_STEERING = 1.0
 NH = 'NH'
@@ -42,10 +41,14 @@ def analyze_steering(val: str):
         raise Exception('Steering exceeded maximum safe value.')
 
 
-def analyze_collisions(val: str):
-    # TODO Implement check
-    if int(val) > 1:
-        raise Exception('Vehicle has collided too many times')
+def analyze_collisions(data: Dict[str, any]):
+    for i, collision_detected in enumerate(data[COLLISIONS]):
+        if collision_detected:
+            start_time = data[DATE][0]
+            collision_time = data[DATE][i]
+            delta = (datetime.strptime(collision_time, '%Y-%m-%d %H:%M:%S')
+                     - datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S'))
+            raise Exception(f'Collision detected at {data[DATE][i]} (after {delta.seconds} seconds).')
 
 
 def analyze_path(actual: List[Tuple[float, float]], expected: List[Tuple[float, float]]):
@@ -81,6 +84,7 @@ def analyze(test_case: str):
 
     pickle_path = [(x, y) for x, y, _ in pickle_map.convert_path(0)]
     analyze_path(data[POS_AIRSIM], pickle_path)
+    analyze_collisions(data)
 
     # draw_path(data[POS_GUI], pickle_map.paths[0].get_gui_coords(), env, f'{test_case}.png')  # Disable by default
 
