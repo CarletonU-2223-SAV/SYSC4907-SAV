@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import tkinter as tk
+import networkx as nx
 from enum import Enum
 import MapSerializer as MS
 from PIL import ImageTk, Image
@@ -51,52 +52,47 @@ def update_canvas(img_choice: int):
         canvas.itemconfig(canvas_container, image=img[1])
 
 
-# Add point if lane is selected
+# Create a new graph
+G = nx.Graph()
+
+# Add edges to the graph, representing the roads on the map
+for road_segment in map_model.road_segments:
+    for lane in road_segment.lanes:
+        for point_index in range(1, len(lane.points)):
+            point1 = lane.points[point_index - 1]
+            point2 = lane.points[point_index]
+            G.add_edge(point1.id, point2.id, weight=1)
+
+# Find the shortest path
+def find_shortest_path(start_point_id, end_point_id):
+    return nx.dijkstra_path(G, start_point_id, end_point_id)
+
+# Handle canvas click
 def handle_canvas_m1(event):
     x, y = event.x, event.y
 
-    if op_mode == Mode.POINT:
-        if selected_seg_id != -1 and selected_lane_id != -1:
-            # Draw canvas point
-            obj_id: int = draw_point(x, y, (f's{selected_seg_id}', f'l{selected_lane_id}'))
-            # Update model
-            map_model.road_segments[selected_seg_id].add_point(selected_lane_id, Point(x, y, obj_id))
-            rerender_road_segments_panel()
-    elif op_mode == Mode.PATH:
-        overlap_size: int = 3
-        if selected_path_id != -1:
-            # Get point_id and coordinates of point clicked
-            found_ids: Tuple[int] = canvas.find_overlapping(x - overlap_size, y - overlap_size,
-                                                            x + overlap_size, y + overlap_size)
-            if len(found_ids) < 2:
-                # Didn't click a point
-                return
+    # Get point_id and coordinates of point clicked
+    overlap_size = 3
+    found_ids = canvas.find_overlapping(x - overlap_size, y - overlap_size, x + overlap_size, y + overlap_size)
+    if len(found_ids) < 2:
+        # Didn't click a point
+        return
+    point_id = found_ids[-1]
 
-            point_id: int = found_ids[-1]
-            coords = canvas.coords(point_id)
-            x = (coords[0] + coords[2]) / 2
-            y = (coords[1] + coords[3]) / 2
+    # Find the shortest path
+    start_point_id = [-645, -573] # the start position point
+    shortest_path = find_shortest_path(start_point_id, point_id)
 
-            clicked_point = Point(x, y, point_id)
-            # Get segment id
-            seg_id, lane_id = get_point_data(point_id)
+    # Draw the shortest path on the canvas
+    for point_index in range(1, len(shortest_path)):
+        point1_id = shortest_path[point_index - 1]
+        point2_id = shortest_path[point_index]
+        point1 = map_model.get_point_by_id(point1_id)
+        point2 = map_model.get_point_by_id(point2_id)
+        canvas.create_line(point1.x, point1.y, point2.x, point2.y, width=2, fill="blue")
 
-            sel_path = map_model.paths[selected_path_id]
-            if sel_path.empty():
-                # Connection is None for first point
-                sel_path.add_to_path(Connection(from_seg_id=seg_id, from_point=clicked_point),
-                                     clicked_point)
-            else:
-                # Get the last connection, point on the path
-                prev_con, prev_point = sel_path.connections[-1]
-                sel_path.add_to_path(Connection(from_seg_id=prev_con.to_seg_id, from_point=prev_point,
-                                                to_seg_id=seg_id, to_point=clicked_point), clicked_point)
-
-            rerender_paths_panel()
-            highlight_path()
-    else:
-        print('Invalid mode')
-
+    # Update the canvas
+    canvas.update()
 
 # Delete point
 def handle_canvas_m3(event):
