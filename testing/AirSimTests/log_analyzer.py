@@ -79,6 +79,7 @@ def analyze(test_case: str):
             time, pos, steering, throttle, collisions = line.split('|')
             x, y = [float(z) for z in pos.split(',')]
             line_pt = Point(x, y, 0)
+            data[DATE].append(time)
             data[POS_GUI].append(line_pt.point_to_gui_coords(ENV_IDS[env]))
             data[POS_AIRSIM].append((x, y))
             data[COLLISIONS].append(collisions)
