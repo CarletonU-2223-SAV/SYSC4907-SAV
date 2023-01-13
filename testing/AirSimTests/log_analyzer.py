@@ -69,7 +69,7 @@ def analyze(test_case: str):
         POS_GUI: [],
         STEERING: 0,
         THROTTLE: 0,
-        COLLISIONS: False,
+        COLLISIONS: [],
     }
 
     with open(filepath, 'r') as f:
@@ -81,6 +81,7 @@ def analyze(test_case: str):
             line_pt = Point(x, y, 0)
             data[POS_GUI].append(line_pt.point_to_gui_coords(ENV_IDS[env]))
             data[POS_AIRSIM].append((x, y))
+            data[COLLISIONS].append(collisions)
 
     pickle_path = [(x, y) for x, y, _ in pickle_map.convert_path(0)]
     analyze_path(data[POS_AIRSIM], pickle_path)
