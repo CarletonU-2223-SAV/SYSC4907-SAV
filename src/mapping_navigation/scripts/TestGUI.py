@@ -475,8 +475,8 @@ window.title("Map creator")
 init_menu_bar()
 
 # Canvas
-img = [ImageTk.PhotoImage(Image.open('AirSim_maps/City_Top.png')),
-       ImageTk.PhotoImage(Image.open('AirSim_maps/NH_Top.png'))]
+img = [ImageTk.PhotoImage(Image.open('AirSim_graphs/City_Graph.png')),
+       ImageTk.PhotoImage(Image.open('AirSim_graphs/NH_Graph.png'))]
 h = img[0].height()
 w = img[0].width()
 
