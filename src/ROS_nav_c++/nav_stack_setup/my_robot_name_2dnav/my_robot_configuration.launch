@@ -1,0 +1,13 @@
+<launch>
+
+ <node pkg="sensors" type="lidar.py" name="lidar" output="screen">
+    <param name="sensor_param" value="param_value" />
+ </node>
+ <node pkg="odom_message" type="odom_message.cpp" name="odom" output="screen">
+ </node>
+ <node pkg="robot_setup_tf" type="tf_broadcaster.cpp" name="tf_broadcaster" output="screen">
+ </node>
+ <node pkg="robot_setup_tf" type="tf_broadcaster.cpp" name="tf_broadcaster" output="screen">
+  </node>
+
+</launch>

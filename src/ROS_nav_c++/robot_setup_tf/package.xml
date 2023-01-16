@@ -58,8 +58,8 @@
   <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>roscpp</exec_depend>
   <exec_depend>tf</exec_depend>
-  <!--depend package="tf"/> -->
-  <!--depend package="nav_msgs"/> -->
+  <depend package="tf"/>
+  <depend package="nav_msgs"/>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
