@@ -7,7 +7,7 @@
  </node>
  <node pkg="robot_setup_tf" type="tf_broadcaster.cpp" name="tf_broadcaster" output="screen">
  </node>
- <node pkg="robot_setup_tf" type="tf_broadcaster.cpp" name="tf_broadcaster" output="screen">
+ <node pkg="robot_setup_tf" type="tf_listener.cpp" name="tf_listener" output="screen">
   </node>
 
 </launch>
