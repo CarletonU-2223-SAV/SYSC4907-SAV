@@ -28,6 +28,19 @@
   <node name="segmented_image" pkg="sensors" type="segmented_image.py" />
   <node name="logging" pkg="sensors" type="logging.py" if="$(arg log)" /> <!-- Launch logging node if flag is set -->
   <node name="binvox_gene" pkg="ros_navigation" type="Ros_nav.py" />
+  <node name="geo_mapping" pkg="geo_mapping" type="rviz_pub.py" output="log" >
+		<!-- RGB camera parameters (parameters when calibrated) -->
+		<param name="Fx" value="320"/>
+		<param name="Fy" value="320"/>
+		<param name="cx" value="320"/>
+		<param name="cy" value="180"/>
+		<param name="width" value="640"/>
+		<!-- Width when calibrated!-->
+		<param name="height" value="360"/>
+		<!-- Height when calibrated!-->
+	</node>
+
+	<node pkg="rviz" type="rviz" name="rviz" output="log" args="-d old_src/geo_mapping/rviz/default.rviz" />
   <!--<node pkg="sensor_node_pkg" type="sensor_node_type" name="sensor_node_name" output="screen">
     <param name="sensor_param" value="param_value" />
   </node>
