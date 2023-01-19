@@ -55,44 +55,143 @@ def update_canvas(img_choice: int):
 # Create a new graph
 G = nx.Graph()
 
-# Add edges to the graph, representing the roads on the map
-for road_segment in map_model.road_segments:
-    for lane in road_segment.lanes:
-        for point_index in range(1, len(lane.points)):
-            point1 = lane.points[point_index - 1]
-            point2 = lane.points[point_index]
-            G.add_edge(point1.id, point2.id, weight=1)
+# Adding nodes (Point) and edges to the graph, representing the roads on the map
+# Currently only NH graph added
+startpoint = Point(645, 573, RoadSegmentType.STRAIGHT)
+point1 = Point(114, 573, RoadSegmentType.INTERSECTION)
+point2 = Point(641, 252, RoadSegmentType.INTERSECTION)
+point3 = Point(1171, 573, RoadSegmentType.INTERSECTION)
+point4 = Point(91, 600, RoadSegmentType.STRAIGHT)
+point5 = Point(91, 573, RoadSegmentType.INTERSECTION)
+point6 = Point(91, 549, RoadSegmentType.STRAIGHT)
+point7 = Point(91, 987, RoadSegmentType.STRAIGHT)
+point8 = Point(91, 252, RoadSegmentType.STRAIGHT)
+point9 = Point(91, 226, RoadSegmentType.INTERSECTION)
+point10 = Point(91, 202, RoadSegmentType.STRAIGHT)
+point11 = Point(91, 47, RoadSegmentType.INTERSECTION)
+point12 = Point(91, 27, RoadSegmentType.INTERSECTION)
+point13 = Point(111, 25, RoadSegmentType.INTERSECTION)
+point14 = Point(616, 19, RoadSegmentType.STRAIGHT)
+point15 = Point(642, 19, RoadSegmentType.INTERSECTION)
+point16 = Point(671, 19, RoadSegmentType.STRAIGHT)
+point17 = Point(1167,25, RoadSegmentType.INTERSECTION)
+point18 = Point(1192, 27, RoadSegmentType.INTERSECTION)
+point19 = Point(1194, 51, RoadSegmentType.INTERSECTION)
+point20 = Point(1196, 548, RoadSegmentType.STRAIGHT)
+point21 = Point(1196, 573, RoadSegmentType.INTERSECTION)
+point22 = Point(1196, 598, RoadSegmentType.STRAIGHT)
+point23 = Point(1196, 989, RoadSegmentType.STRAIGHT)
+point24 = Point(645, 989, RoadSegmentType.STRAIGHT)
+point25 = Point(118, 228, RoadSegmentType.INTERSECTION)
+point26 = Point(614, 228, RoadSegmentType.STRAIGHT)
+point27 = Point(641, 228, RoadSegmentType.INTERSECTION)
+point28 = Point(641, 200, RoadSegmentType.STRAIGHT)
+point29 = Point(641, 43, RoadSegmentType.INTERSECTION)
 
-# Find the shortest path
+edges = [
+    (startpoint, point1, {"weight": 6}),
+    (startpoint, point2, {"weight": 4}),
+    (startpoint, point3, {"weight": 6}),
+    (startpoint, point24, {"weight": 5}),
+    (point1, point5, {"weight": 0.5}),
+    (point5, point4, {"weight": 0.5}),
+    (point5, point6, {"weight": 0.5}),
+    (point4, point7, {"weight": 5}),
+    (point6, point8, {"weight": 5}),
+    (point8, point9, {"weight": 0.5}),
+    (point9, point10, {"weight": 0.5}),
+    (point10, point11, {"weight": 2}),
+    (point11, point12, {"weight": 0.5}),
+    (point12, point13, {"weight": 0.5}),
+    (point13, point14, {"weight": 6}),
+    (point14, point15, {"weight": 0.5}),
+    (point15, point16, {"weight": 0.5}),
+    (point16, point17, {"weight": 6}),
+    (point17, point18, {"weight": 0.5}),
+    (point18, point19, {"weight": 0.5}),
+    (point19, point20, {"weight": 6}),
+    (point20, point21, {"weight": 0.5}),
+    (point21, point22, {"weight": 0.5}),
+    (point22, point23, {"weight": 5}),
+    (point3, point21, {"weight": 0.5}),
+    (point9, point25, {"weight": 0.5}),
+    (point25, point26, {"weight": 6}),
+    (point26, point27, {"weight": 0.5}),
+    (point27, point28, {"weight": 0.5}),
+    (point27, point2, {"weight": 0.5}),
+    (point28, point29, {"weight": 2}),
+    (point29, point15, {"weight": 0.5}),
+]
+G.add_edges_from(edges)
+
+#used for iteration
+pointList = [startpoint,
+             point1,
+             point2,
+             point3,
+             point4,
+             point5,
+             point6,
+             point7,
+             point8,
+             point9,
+             point10,
+             point11,
+             point12,
+             point13,
+             point14,
+             point15,
+             point16,
+             point17,
+             point18,
+             point19,
+             point20,
+             point21,
+             point22,
+             point23,
+             point24,
+             point25,
+             point26,
+             point27,
+             point28,
+             point29]
+
+# Find the shortest path using dijkstra
 def find_shortest_path(start_point_id, end_point_id):
     return nx.dijkstra_path(G, start_point_id, end_point_id)
 
-# Handle canvas click
+# create path from clicking on canvas
 def handle_canvas_m1(event):
     x, y = event.x, event.y
 
-    # Get point_id and coordinates of point clicked
-    overlap_size = 3
-    found_ids = canvas.find_overlapping(x - overlap_size, y - overlap_size, x + overlap_size, y + overlap_size)
-    if len(found_ids) < 2:
-        # Didn't click a point
+    #delete line and path if already created
+    canvas.delete("line")
+    if not(map_model.empty()):
+        map_model.delete_path(0)
+
+    #choosing node to travel too
+    point_found = False
+    for point in pointList:
+        if abs(x - point.x) < 10 and abs(y - point.y) < 10:
+            endpoint = point
+            point_found = True
+            break
+
+    if point_found:
+        path = find_shortest_path(startpoint, endpoint)
+    else:
+        #if no node is clicked
         return
-    point_id = found_ids[-1]
 
-    # Find the shortest path
-    start_point_id = [-645, -573] # the start position point
-    shortest_path = find_shortest_path(start_point_id, point_id)
+    #create line on canvas showing generated path
+    for i in range(len(path)):
+        if i < len(path)-1:
+            canvas.create_line(path[i].x, path[i].y, path[i+1].x, path[i+1].y, fill="red", width= 3, tags="line")
 
-    # Draw the shortest path on the canvas
-    for point_index in range(1, len(shortest_path)):
-        point1_id = shortest_path[point_index - 1]
-        point2_id = shortest_path[point_index]
-        point1 = map_model.get_point_by_id(point1_id)
-        point2 = map_model.get_point_by_id(point2_id)
-        canvas.create_line(point1.x, point1.y, point2.x, point2.y, width=2, fill="blue")
-
-    # Update the canvas
-    canvas.update()
+    #add path to map_model for navigation
+    lane: Lane = Lane()
+    lane.set_lane(path)
+    map_model.add_path(lane)
 
 # Delete point
 def handle_canvas_m3(event):
@@ -491,7 +590,7 @@ label_b = tk.Label(master=path_frame, text='no paths yet')
 label_b.pack()
 
 canvas = tk.Canvas(window, width=w, height=h)
-canvas_container = canvas.create_image(0, 0, image=img[0], anchor='nw')
+canvas_container = canvas.create_image(0, 0, image=img[1], anchor='nw')
 canvas.pack(side="left", fill="both", expand="yes")
 # Canvas event handlers
 canvas.bind("<Button-1>", handle_canvas_m1)
