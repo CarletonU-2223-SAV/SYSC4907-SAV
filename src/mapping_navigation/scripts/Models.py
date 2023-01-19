@@ -78,6 +78,10 @@ class Lane:
     def empty(self):
         return not self.points
 
+    def get_gui_coords(self) -> List[Tuple[float, float]]:
+        out = [(point.x, point.y) for point in self.points]
+        return out
+
 class RoadSegment:
     def __init__(self, segment_id: int, seg_type: RoadSegmentType, lanes: List[Lane] = None):
         self.segment_id: int = segment_id
@@ -134,12 +138,6 @@ class Path:
 
     def empty(self):
         return not self.connections
-
-    def get_gui_coords(self) -> List[Tuple[float, float]]:
-        out = [(connection.from_point.x, connection.from_point.y) for connection, _ in self.connections]
-        last_point = self.connections[-1][1]  # Do last point separately as it doesn't have a connection
-        out.append((last_point.x, last_point.y))
-        return out
 
 
 class MapModel:
