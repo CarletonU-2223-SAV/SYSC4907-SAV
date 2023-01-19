@@ -162,7 +162,7 @@ class MapModel:
         self.curr_id += 1
         return self.curr_id - 1
 
-    # Add empty path
+    # Add new path to model
     def add_path(self, new_path: Lane):
         self.paths.append(new_path)
 
