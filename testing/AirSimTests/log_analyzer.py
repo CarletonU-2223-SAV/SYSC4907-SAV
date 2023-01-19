@@ -82,7 +82,7 @@ def analyze(test_case: str):
     pickle_path = [(x, y) for x, y, _ in pickle_map.convert_path(0)]
     analyze_path(data[POS_AIRSIM], pickle_path)
 
-    draw_path(data[POS_GUI], pickle_map.paths[0].get_gui_coords(), env, f'{test_case}.png')  # Disable by default
+    # draw_path(data[POS_GUI], pickle_map.paths[0].get_gui_coords(), env, f'{test_case}.png')  # Disable by default
 
 
 def draw_path(actual: List[Tuple[float, float]], expected: List[Tuple[float, float]], env: str, save_path: str):
