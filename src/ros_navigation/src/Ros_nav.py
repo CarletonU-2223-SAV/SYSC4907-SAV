@@ -20,7 +20,7 @@ def binvox_map():
         center = airsim.Vector3r(x_curr, y_curr, z_curr)
         counter_str = str(counter)
         output_path = Path(__file__).parent / "binvox maps" / f"map{counter_str}.binvox"
-        client.simCreateVoxelGrid(center, 100, 100, 100, 0.5, str(output_path))
+        client.simCreateVoxelGrid(center, 500, 500, 500, 0.5, str(output_path))
         counter = counter + 1
 
 
