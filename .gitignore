@@ -20,4 +20,3 @@ catkin_ws/*.pyc
 src/cruise_control/scripts/speed_output.txt
 .idea
 
-*.binvox
