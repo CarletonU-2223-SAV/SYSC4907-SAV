@@ -14,7 +14,7 @@ catkin_ws/lib/
 catkin_ws/build_isolated/
 catkin_ws/devel_isolated/
 catkin_ws/*.pyc
-/.vs
+.vs
 .git
 **/airsim/
 src/cruise_control/scripts/speed_output.txt
