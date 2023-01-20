@@ -2,7 +2,7 @@
   <arg name="host" default="127.0.0.1" />
   <param name="/host_ip" type="string" value="$(arg host)" /> <!-- set global host_ip param -->
 
-  <arg name="path" default="NH_new_coords.pickle" />
+  <arg name="path" default="NH_auto_path_coords.pickle" />
   <param name="/path_file" type="string" value="$(arg path)" /> <!-- set path to vehicle's path file -->
 
   <arg name="log" default="false" />
