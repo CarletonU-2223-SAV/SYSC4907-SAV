@@ -34,10 +34,7 @@ map_model: MapModel = MapModel()
 def handle_load():
     global map_model
     map_model = MS.load_from_file()
-    # Update render
-    rerender_points()
-    rerender_road_segments_panel()
-    rerender_paths_panel()
+    draw_line(map_model.get_path())
 
 
 CITY = 1
@@ -87,10 +84,10 @@ point26 = Point(614, 228, RoadSegmentType.STRAIGHT)
 point27 = Point(641, 228, RoadSegmentType.INTERSECTION)
 point28 = Point(641, 200, RoadSegmentType.STRAIGHT)
 point29 = Point(641, 43, RoadSegmentType.INTERSECTION)
-point30 = Point(611, 573, RoadSegmentType.INTERSECTION)
-point31 = Point(644, 546, RoadSegmentType.INTERSECTION)
-point32 = Point(672, 572, RoadSegmentType.INTERSECTION)
-point33 = Point(645, 603, RoadSegmentType.INTERSECTION)
+point30 = Point(575, 573, RoadSegmentType.STRAIGHT)
+point31 = Point(644, 510, RoadSegmentType.STRAIGHT)
+point32 = Point(705, 572, RoadSegmentType.STRAIGHT)
+point33 = Point(645, 640, RoadSegmentType.STRAIGHT)
 
 edges = [
     (startpoint, point30, {"weight": 0.5}),
@@ -196,9 +193,7 @@ def handle_canvas_m1(event):
         return
 
     #create line on canvas showing generated path
-    for i in range(len(path)):
-        if i < len(path)-1:
-            canvas.create_line(path[i].x, path[i].y, path[i+1].x, path[i+1].y, fill="red", width= 3, tags="line")
+    draw_line(path)
 
     #add path to map_model for navigation
     lane: Lane = Lane()
@@ -235,10 +230,12 @@ def get_point_data(point_id) -> tuple:
     return seg_id, lane_id
 
 
-# Size is radius, returns id of point
-def draw_point(x, y, tags: Union[str, Tuple], size: int = 2) -> int:
-    # include tag of segment_id
-    return canvas.create_oval(x - size, y - size, x + size, y + size, fill='red', outline='yellow', tags=tags)
+# draws path onto canvas
+def draw_line(path):
+    canvas.delete("line")
+    for i in range(len(path)):
+        if i < len(path) - 1:
+            canvas.create_line(path[i].x, path[i].y, path[i + 1].x, path[i + 1].y, fill="red", width=3, tags="line")
 
 
 # clear existing highlights

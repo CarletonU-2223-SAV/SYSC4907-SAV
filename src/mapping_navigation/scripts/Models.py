@@ -164,6 +164,9 @@ class MapModel:
     def add_path(self, new_path: Lane):
         self.paths.append(new_path)
 
+    def get_path(self) -> List[Point]:
+        return self.paths[0].points
+
     def delete_path(self, index):
         del self.paths[index]
 
