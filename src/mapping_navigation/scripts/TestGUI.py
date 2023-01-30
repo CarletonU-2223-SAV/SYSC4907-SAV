@@ -87,12 +87,20 @@ point26 = Point(614, 228, RoadSegmentType.STRAIGHT)
 point27 = Point(641, 228, RoadSegmentType.INTERSECTION)
 point28 = Point(641, 200, RoadSegmentType.STRAIGHT)
 point29 = Point(641, 43, RoadSegmentType.INTERSECTION)
+point30 = Point(611, 573, RoadSegmentType.INTERSECTION)
+point31 = Point(644, 546, RoadSegmentType.INTERSECTION)
+point32 = Point(672, 572, RoadSegmentType.INTERSECTION)
+point33 = Point(645, 603, RoadSegmentType.INTERSECTION)
 
 edges = [
-    (startpoint, point1, {"weight": 6}),
-    (startpoint, point2, {"weight": 4}),
-    (startpoint, point3, {"weight": 6}),
-    (startpoint, point24, {"weight": 5}),
+    (startpoint, point30, {"weight": 0.5}),
+    (startpoint, point31, {"weight": 0.5}),
+    (startpoint, point32, {"weight": 0.5}),
+    (startpoint, point33, {"weight": 0.5}),
+    (point30, point1, {"weight": 5.5}),
+    (point31, point2, {"weight": 3.5}),
+    (point32, point3, {"weight": 5.5}),
+    (point33, point24, {"weight": 4.5}),
     (point1, point5, {"weight": 0.5}),
     (point5, point4, {"weight": 0.5}),
     (point5, point6, {"weight": 0.5}),
@@ -154,7 +162,11 @@ pointList = [startpoint,
              point26,
              point27,
              point28,
-             point29]
+             point29,
+             point30,
+             point31,
+             point32,
+             point33]
 
 # Find the shortest path using dijkstra
 def find_shortest_path(start_point_id, end_point_id):
