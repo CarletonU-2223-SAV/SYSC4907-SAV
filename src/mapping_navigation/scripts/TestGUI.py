@@ -54,7 +54,7 @@ G = nx.Graph()
 
 # Adding nodes (Point) and edges to the graph, representing the roads on the map
 # Currently only NH graph added
-startpoint = Point(645, 573, RoadSegmentType.TURN)
+startpoint = Point(645, 573, RoadSegmentType.INTERSECTION)
 point1 = Point(114, 573, RoadSegmentType.STRAIGHT)
 point2 = Point(641, 252, RoadSegmentType.STRAIGHT)
 point3 = Point(1171, 573, RoadSegmentType.STRAIGHT)
