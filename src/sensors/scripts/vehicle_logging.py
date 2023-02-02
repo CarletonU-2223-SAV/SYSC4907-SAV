@@ -1,15 +1,13 @@
 import rospy
-import airsim
 from pathlib import Path
 from datetime import datetime
 from typing import List
+from common.bridge import get_bridge
 
 
 class Logging:
     def __init__(self):
-        host_ip = rospy.get_param('/host_ip')
-        self.client = airsim.CarClient(ip=host_ip)
-        self.client.confirmConnection()
+        self.client = get_bridge()
         rospy.init_node('logging', anonymous=True)
         rospy.on_shutdown(self.write_log)
         self.rate = rospy.Rate(1)  # 1 Hz
@@ -17,13 +15,12 @@ class Logging:
 
     def log(self):
         while not rospy.is_shutdown():
-            car_controls = self.client.getCarControls()
             time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            pos = self.client.getCarState().kinematics_estimated.position
+            pos = self.client.get_position()
             pos_str = ','.join([str(pos.x_val), str(pos.y_val)])
-            steering = car_controls.steering
-            throttle = car_controls.throttle
-            collisions = self.client.simGetCollisionInfo().has_collided
+            steering = self.client.get_steering()
+            throttle = self.client.get_throttle()
+            collisions = self.client.has_collided()
             self.data.append([x.__str__() for x in [time, pos_str, steering, throttle, collisions]])
             self.rate.sleep()
 

@@ -2,12 +2,12 @@
 
 # Example ROS node for publishing AirSim images.
 
-import airsim
-
 import rospy
 
 # ROS Image message
 from sensor_msgs.msg import Image
+
+from common.bridge import get_bridge, SEGMENTATION_IMAGE
 
 
 def segmented_image():
@@ -16,15 +16,11 @@ def segmented_image():
     rate = rospy.Rate(10)  # 10hz
 
     # connect to the AirSim simulator
-    host_ip = rospy.get_param('/host_ip')
-    client = airsim.CarClient(ip=host_ip)
-    client.confirmConnection()
+    sim = get_bridge()
 
     while not rospy.is_shutdown():
         # get camera images from the car
-        responses = client.simGetImages([airsim.ImageRequest("1", airsim.ImageType.Segmentation, False,
-                                                             False)])  # scene vision image in uncompressed RGB array
-        response = responses[0]
+        response = sim.get_image(1, SEGMENTATION_IMAGE)  # scene vision image in uncompressed RGB array
         img_rgb_string = response.image_data_uint8
 
         # Populate image message
