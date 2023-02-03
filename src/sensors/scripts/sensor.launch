@@ -1,0 +1,11 @@
+<launch>
+  <arg name="host" default="127.0.0.1" />
+  <param name="/host_ip" type="string" value="$(arg host)" /> <!-- set global host_ip param -->
+
+  <node name="speedometer" pkg="sensors" type="speedometer.py" />
+  <node name="lidar" pkg="sensors" type="lidar.py" />
+  <node name="car_image_raw" pkg="sensors" type="car_image_raw.py" />
+  <node name="car_pose" pkg="sensors" type="car_pose.py" />
+  <node name="segmented_image" pkg="sensors" type="segmented_image.py" />
+
+</launch>
