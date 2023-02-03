@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 
 import rospy
-import airsim
 import numpy as np
 import cv2 as cv
 
 from sign_car_recognition.msg import DetectionResult, DetectionResults
 from std_msgs.msg import Float64, Float64MultiArray
 from lane_keep_assist.msg import LaneStatus, LaneLine
+from common.bridge import CarControls, get_bridge, SCENE_IMAGE
 from lane_bound_status import LaneBoundStatus
 from mapping_navigation.msg import PathData
 from road_segment_type import RoadSegmentType
@@ -114,12 +114,8 @@ class CentralControl:
     """Central Controller containing logic that processes all the sensor data"""
 
     def __init__(self):
-        host_ip = rospy.get_param('/host_ip')
-
-        self.client = airsim.CarClient(ip=host_ip)
-        self.client.confirmConnection()
-        self.client.enableApiControl(True)
-        self.car_controls = airsim.CarControls()
+        self.bridge = get_bridge()
+        self.car_controls = CarControls()
 
         self.ready = False
         self.speed: float = INITIAL_SPEED
@@ -158,9 +154,7 @@ class CentralControl:
 
     # Get scene image using Airsim API. For debugging purposes
     def get_scene_image(self):
-        resp: airsim.ImageResponse = self.client.simGetImages(
-            [airsim.ImageRequest('0', airsim.ImageType.Scene, False, False)])[0]
-
+        resp = self.bridge.get_image(0, SCENE_IMAGE)
         img1d = np.frombuffer(resp.image_data_uint8, dtype=np.uint8)
         # reshape array to 3 channel image array
         return img1d.reshape(resp.height, resp.width, 3)
@@ -293,7 +287,7 @@ class CentralControl:
 
             # Set controls
             if self.ready:
-                self.client.setCarControls(self.car_controls)
+                self.bridge.set_controls(self.car_controls)
 
                 # Mark danger zones
                 cv.line(scene, (0, round(l_int)), (round(-l_int / l_slope), 0), RED, LINE_THICKNESS)  # Left

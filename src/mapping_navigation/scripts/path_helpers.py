@@ -2,20 +2,18 @@
 
 # Temp file to read in coordinates from the car, get a new point every 2 meters.
 import numpy as np
-import airsim
+from common.bridge import get_bridge
 from map_information import *
 from typing import List
 
 
 # Write points to a file, can set the total distance and the distance between the points
 def write_points(filename: str, dist: int, delta: int):
-    client = airsim.CarClient()
-    client.confirmConnection()
+    sim = get_bridge()
 
     with open(filename, "w") as coord_file:
-
         # Get the starting point
-        pos_init = client.getCarState().kinematics_estimated.position
+        pos_init = sim.get_position()
         x_init = np.float16(pos_init.x_val)
         y_init = np.float16(pos_init.y_val)
         last_point = np.array(x_init, y_init)
@@ -26,7 +24,7 @@ def write_points(filename: str, dist: int, delta: int):
 
             # poll unit a new point is recorded
             while not new_point:
-                pos_curr = client.getCarState().kinematics_estimated.position
+                pos_curr = sim.get_position()
                 x_curr = np.float16(pos_curr.x_val)
                 y_curr = np.float16(pos_curr.y_val)
                 curr_point = np.array(x_curr, y_curr)

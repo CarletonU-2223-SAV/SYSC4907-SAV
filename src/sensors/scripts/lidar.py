@@ -3,7 +3,7 @@
 import rospy
 from sensor_msgs.msg import PointCloud
 from geometry_msgs.msg import Point32
-import airsim
+from common.bridge import get_bridge
 
 
 FLOATS_PER_POINT = 3
@@ -19,11 +19,7 @@ class Lidar:
 
     def send_lidar_data(self):
         rospy.init_node('talker', anonymous=True)
-
-        host_ip = rospy.get_param('/host_ip')
-
-        client = airsim.CarClient(ip=host_ip)
-        client.confirmConnection()
+        sim = get_bridge()
 
         rate = rospy.Rate(30)  # 30hz
         while not rospy.is_shutdown():
@@ -31,7 +27,7 @@ class Lidar:
             point_cloud = PointCloud()
             point_cloud.points = []
 
-            lidar_data = client.getLidarData().point_cloud
+            lidar_data = sim.get_lidar_point_cloud()
 
             num_points = len(lidar_data) // FLOATS_PER_POINT
 
