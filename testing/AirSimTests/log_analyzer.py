@@ -27,7 +27,7 @@ STEERING = 'steering'
 THROTTLE = 'throttle'
 COLLISIONS = 'collided'
 
-PR_COMMENT_FLAG = '--pr-comment'
+PR_COMMENT_FLAG = '--pr-branch'
 
 metrics = []
 errors = []
