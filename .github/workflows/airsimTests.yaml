@@ -4,9 +4,6 @@ on:
   pull_request:
     branches:
       - master
-  push:
-    branches:
-      - master
 
 jobs:
   build:
@@ -26,9 +23,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install Pillow
       - name: Run metrics on base test
-        run: python testing/AirSimTests/log_analyzer.py NH_auto_path_coords --pr-branch=${GITHUB_REF##*/}
+        run: |
+          python testing/AirSimTests/log_analyzer.py NH_auto_path_coords --pr-branch=${{ github.event.pull_request.head.ref }},${{ github.event.pull_request.head.sha }},
       - name: Comment metrics if PR
-        if: ${{ github.event_name == 'pull_request' }}
         uses: thollander/actions-comment-pull-request@v2
         with:
           filePath: pr_message.txt

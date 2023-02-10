@@ -101,7 +101,8 @@ def analyze(test_case: str, pr_branch: Optional[str]):
         # Running on GitHub for a PR, log metrics to a file
         pr_message_path = Path(__file__).parents[2] / 'pr_message.txt'
         with open(pr_message_path, 'w') as f:
-            f.write(f'### Analysis for branch { pr_branch }\n')
+            branch_name, commit_hash = pr_branch.split(',')
+            f.write(f'### Analysis for commit { commit_hash[:6] } on branch { branch_name }\n')
             for metric in metrics:
                 f.write(f'{metric}\n')
             f.write('\n')
