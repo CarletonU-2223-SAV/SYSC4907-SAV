@@ -101,14 +101,14 @@ def analyze(test_case: str, pr_branch: Optional[str]):
         # Running on GitHub for a PR, log metrics to a file
         pr_message_path = Path(__file__).parents[2] / 'pr_message.txt'
         with open(pr_message_path, 'w') as f:
-            f.write(f'### Analysis for branch { pr_branch }  \n')
+            f.write(f'### Analysis for branch { pr_branch }\n')
             for metric in metrics:
-                f.write(f'{metric}  ')
+                f.write(f'{metric}\n')
             f.write('\n')
             if errors:
-                f.write('**ERRORS:**  ')
+                f.write('**ERRORS:**\n')
                 for error in errors:
-                    f.write(f'- {error}')
+                    f.write(f'- {error}\n')
 
 
 def draw_path(actual: List[Tuple[float, float]], expected: List[Tuple[float, float]], env: str, save_path: str):
