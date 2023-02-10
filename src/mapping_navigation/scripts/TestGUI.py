@@ -17,39 +17,13 @@ C_G = nx.Graph()
 
 # Adding nodes (Point) and edges to the graph, representing the roads on the map
 NH_startpoint = Point(645, 573, RoadSegmentType.TURN)
-NH_point1 = Point(114, 573, RoadSegmentType.INTERSECTION)
-NH_point2 = Point(641, 252, RoadSegmentType.INTERSECTION)
-NH_point3 = Point(1171, 573, RoadSegmentType.INTERSECTION)
-NH_point4 = Point(91, 600, RoadSegmentType.STRAIGHT)
-NH_point5 = Point(91, 573, RoadSegmentType.INTERSECTION)
-NH_point6 = Point(91, 549, RoadSegmentType.STRAIGHT)
-NH_point7 = Point(91, 987, RoadSegmentType.STRAIGHT)
-NH_point8 = Point(91, 252, RoadSegmentType.STRAIGHT)
-NH_point9 = Point(91, 226, RoadSegmentType.INTERSECTION)
-NH_point10 = Point(91, 202, RoadSegmentType.STRAIGHT)
-NH_point11 = Point(91, 47, RoadSegmentType.INTERSECTION)
-NH_point12 = Point(91, 27, RoadSegmentType.INTERSECTION)
-NH_point13 = Point(111, 25, RoadSegmentType.INTERSECTION)
-NH_point14 = Point(616, 19, RoadSegmentType.STRAIGHT)
-NH_point15 = Point(642, 19, RoadSegmentType.INTERSECTION)
-NH_point16 = Point(671, 19, RoadSegmentType.STRAIGHT)
-NH_point17 = Point(1167,25, RoadSegmentType.INTERSECTION)
-NH_point18 = Point(1192, 27, RoadSegmentType.INTERSECTION)
-NH_point19 = Point(1194, 51, RoadSegmentType.INTERSECTION)
-NH_point20 = Point(1196, 548, RoadSegmentType.STRAIGHT)
-NH_point21 = Point(1196, 573, RoadSegmentType.INTERSECTION)
-NH_point22 = Point(1196, 598, RoadSegmentType.STRAIGHT)
-NH_point23 = Point(1196, 989, RoadSegmentType.STRAIGHT)
-NH_point24 = Point(645, 989, RoadSegmentType.STRAIGHT)
-NH_point25 = Point(118, 228, RoadSegmentType.INTERSECTION)
-NH_point26 = Point(614, 228, RoadSegmentType.STRAIGHT)
-NH_point27 = Point(641, 228, RoadSegmentType.INTERSECTION)
-NH_point28 = Point(641, 200, RoadSegmentType.STRAIGHT)
-NH_point29 = Point(641, 43, RoadSegmentType.INTERSECTION)
-NH_point30 = Point(575, 573, RoadSegmentType.STRAIGHT)
-NH_point31 = Point(644, 510, RoadSegmentType.STRAIGHT)
-NH_point32 = Point(705, 572, RoadSegmentType.STRAIGHT)
-NH_point33 = Point(645, 640, RoadSegmentType.STRAIGHT)
+NH_intersection_1 = Point(89, 573, RoadSegmentType.INTERSECTION)
+NH_intersection_2 = Point(89, 229, RoadSegmentType.INTERSECTION)
+NH_intersection_3 = Point(89, 22, RoadSegmentType.INTERSECTION)
+NH_intersection_4 = Point(645, 229, RoadSegmentType.INTERSECTION)
+NH_intersection_5 = Point(645, 22, RoadSegmentType.INTERSECTION)
+NH_intersection_6 = Point(1195, 573, RoadSegmentType.INTERSECTION)
+NH_intersection_7 = Point(1195, 22, RoadSegmentType.INTERSECTION)
 
 C_startpoint = Point(614, 589, RoadSegmentType.TURN)
 C_point1 = Point(632, 564, RoadSegmentType.STRAIGHT)
@@ -126,44 +100,44 @@ C_point71 = Point(269, 787, RoadSegmentType.STRAIGHT)
 C_point72 = Point(261, 821, RoadSegmentType.STRAIGHT)
 C_point73 = Point(255, 984, RoadSegmentType.STRAIGHT)
 
-NH_edges = [
-    (NH_startpoint, NH_point30, {"weight": 0.5}),
-    (NH_startpoint, NH_point31, {"weight": 0.5}),
-    (NH_startpoint, NH_point32, {"weight": 0.5}),
-    (NH_startpoint, NH_point33, {"weight": 0.5}),
-    (NH_point30, NH_point1, {"weight": 5.5}),
-    (NH_point31, NH_point2, {"weight": 3.5}),
-    (NH_point32, NH_point3, {"weight": 5.5}),
-    (NH_point33, NH_point24, {"weight": 4.5}),
-    (NH_point1, NH_point5, {"weight": 0.5}),
-    (NH_point5, NH_point4, {"weight": 0.5}),
-    (NH_point5, NH_point6, {"weight": 0.5}),
-    (NH_point4, NH_point7, {"weight": 5}),
-    (NH_point6, NH_point8, {"weight": 5}),
-    (NH_point8, NH_point9, {"weight": 0.5}),
-    (NH_point9, NH_point10, {"weight": 0.5}),
-    (NH_point10, NH_point11, {"weight": 2}),
-    (NH_point11, NH_point12, {"weight": 0.5}),
-    (NH_point12, NH_point13, {"weight": 0.5}),
-    (NH_point13, NH_point14, {"weight": 6}),
-    (NH_point14, NH_point15, {"weight": 0.5}),
-    (NH_point15, NH_point16, {"weight": 0.5}),
-    (NH_point16, NH_point17, {"weight": 6}),
-    (NH_point17, NH_point18, {"weight": 0.5}),
-    (NH_point18, NH_point19, {"weight": 0.5}),
-    (NH_point19, NH_point20, {"weight": 6}),
-    (NH_point20, NH_point21, {"weight": 0.5}),
-    (NH_point21, NH_point22, {"weight": 0.5}),
-    (NH_point22, NH_point23, {"weight": 5}),
-    (NH_point3, NH_point21, {"weight": 0.5}),
-    (NH_point9, NH_point25, {"weight": 0.5}),
-    (NH_point25, NH_point26, {"weight": 6}),
-    (NH_point26, NH_point27, {"weight": 0.5}),
-    (NH_point27, NH_point28, {"weight": 0.5}),
-    (NH_point27, NH_point2, {"weight": 0.5}),
-    (NH_point28, NH_point29, {"weight": 2}),
-    (NH_point29, NH_point15, {"weight": 0.5}),
-]
+# NH_edges = [
+#     (NH_startpoint, NH_point30, {"weight": 0.5}),
+#     (NH_startpoint, NH_point31, {"weight": 0.5}),
+#     (NH_startpoint, NH_point32, {"weight": 0.5}),
+#     (NH_startpoint, NH_point33, {"weight": 0.5}),
+#     (NH_point30, NH_point1, {"weight": 5.5}),
+#     (NH_point31, NH_point2, {"weight": 3.5}),
+#     (NH_point32, NH_point3, {"weight": 5.5}),
+#     (NH_point33, NH_point24, {"weight": 4.5}),
+#     (NH_point1, NH_point5, {"weight": 0.5}),
+#     (NH_point5, NH_point4, {"weight": 0.5}),
+#     (NH_point5, NH_point6, {"weight": 0.5}),
+#     (NH_point4, NH_point7, {"weight": 5}),
+#     (NH_point6, NH_point8, {"weight": 5}),
+#     (NH_point8, NH_point9, {"weight": 0.5}),
+#     (NH_point9, NH_point10, {"weight": 0.5}),
+#     (NH_point10, NH_point11, {"weight": 2}),
+#     (NH_point11, NH_point12, {"weight": 0.5}),
+#     (NH_point12, NH_point13, {"weight": 0.5}),
+#     (NH_point13, NH_point14, {"weight": 6}),
+#     (NH_point14, NH_point15, {"weight": 0.5}),
+#     (NH_point15, NH_point16, {"weight": 0.5}),
+#     (NH_point16, NH_point17, {"weight": 6}),
+#     (NH_point17, NH_point18, {"weight": 0.5}),
+#     (NH_point18, NH_point19, {"weight": 0.5}),
+#     (NH_point19, NH_point20, {"weight": 6}),
+#     (NH_point20, NH_point21, {"weight": 0.5}),
+#     (NH_point21, NH_point22, {"weight": 0.5}),
+#     (NH_point22, NH_point23, {"weight": 5}),
+#     (NH_point3, NH_point21, {"weight": 0.5}),
+#     (NH_point9, NH_point25, {"weight": 0.5}),
+#     (NH_point25, NH_point26, {"weight": 6}),
+#     (NH_point26, NH_point27, {"weight": 0.5}),
+#     (NH_point27, NH_point28, {"weight": 0.5}),
+#     (NH_point27, NH_point2, {"weight": 0.5}),
+#     (NH_point28, NH_point29, {"weight": 2}),
+#     (NH_point29, NH_point15, {"weight": 0.5}),
+# ]
 
 C_edges = [
 (C_startpoint, C_point1, {"weight": 1}),
@@ -243,45 +217,45 @@ C_edges = [
     (C_point72,	C_point73, {"weight": 5})
 ]
 
-NH_G.add_edges_from(NH_edges)
+# NH_G.add_edges_from(NH_edges)
 C_G.add_edges_from(C_edges)
 
 #used for iteration
-NH_pointList = [NH_startpoint,
-             NH_point1,
-             NH_point2,
-             NH_point3,
-             NH_point4,
-             NH_point5,
-             NH_point6,
-             NH_point7,
-             NH_point8,
-             NH_point9,
-             NH_point10,
-             NH_point11,
-             NH_point12,
-             NH_point13,
-             NH_point14,
-             NH_point15,
-             NH_point16,
-             NH_point17,
-             NH_point18,
-             NH_point19,
-             NH_point20,
-             NH_point21,
-             NH_point22,
-             NH_point23,
-             NH_point24,
-             NH_point25,
-             NH_point26,
-             NH_point27,
-             NH_point28,
-             NH_point29,
-             NH_point30,
-             NH_point31,
-             NH_point32,
-             NH_point33
-]
+# NH_pointList = [NH_startpoint,
+#              NH_point1,
+#              NH_point2,
+#              NH_point3,
+#              NH_point4,
+#              NH_point5,
+#              NH_point6,
+#              NH_point7,
+#              NH_point8,
+#              NH_point9,
+#              NH_point10,
+#              NH_point11,
+#              NH_point12,
+#              NH_point13,
+#              NH_point14,
+#              NH_point15,
+#              NH_point16,
+#              NH_point17,
+#              NH_point18,
+#              NH_point19,
+#              NH_point20,
+#              NH_point21,
+#              NH_point22,
+#              NH_point23,
+#              NH_point24,
+#              NH_point25,
+#              NH_point26,
+#              NH_point27,
+#              NH_point28,
+#              NH_point29,
+#              NH_point30,
+#              NH_point31,
+#              NH_point32,
+#              NH_point33
+# ]
 
 C_pointList = [C_startpoint,
             C_point1,
@@ -382,12 +356,12 @@ def handle_canvas_m1(event):
                 endpoint = point
                 point_found = True
                 break
-    else:
-        for point in NH_pointList:
-            if abs(x - point.x) < 10 and abs(y - point.y) < 10:
-                endpoint = point
-                point_found = True
-                break
+    # else:
+    #     for point in NH_pointList:
+    #         if abs(x - point.x) < 10 and abs(y - point.y) < 10:
+    #             endpoint = point
+    #             point_found = True
+    #             break
 
     if point_found:
         if current_image == CITY:
