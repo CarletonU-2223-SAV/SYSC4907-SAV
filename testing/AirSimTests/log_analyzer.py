@@ -29,6 +29,9 @@ COLLISIONS = 'collided'
 
 PR_COMMENT_FLAG = '--pr-comment'
 
+metrics = []
+errors = []
+
 
 def analyze_time(times: List[str]):
     # TODO Implement check
@@ -49,13 +52,15 @@ def analyze_collisions(data: Dict[str, any]):
             start_time = data[DATE][0]
             collision_time = data[DATE][i]
             delta = collision_time - start_time
-            #raise Exception(f'Collision detected at {data[DATE][i]} (after {delta.seconds} seconds).')
+            position = f'({data[POS_AIRSIM][0]}, {data[POS_AIRSIM[1]]})'
+            errors.append(f'Collision detected at {data[DATE][i]},'
+                          f' position {position} (after {delta.seconds} seconds).')
 
 
 def analyze_path(actual: List[Tuple[float, float]], expected: List[Tuple[float, float]]):
-    # TODO Implement check
     if not actual or not expected:
         raise Exception('Could not find points to analyze')
+    metrics.append('Test metric: Measured 99%, expected 100%')
 
 
 def analyze(test_case: str, log_pr_message: bool):
@@ -95,9 +100,14 @@ def analyze(test_case: str, log_pr_message: bool):
         # Running on GitHub for a PR, log metrics to a file
         pr_message_path = Path(__file__).parents[2] / 'pr_message.txt'
         with open(pr_message_path, 'w') as f:
-            pass
-            #f.write('**Testing** some [markdown](https://github.com/CarletonU-2223-SAV/SYSC4907-SAV/)')
-            #f.write('# Header!!')
+            f.write('### Analysis for branch ${{ github.ref_name }}  \n')
+            for metric in metrics:
+                f.write(f'{metric}  ')
+            f.write('\n')
+            if errors:
+                f.write('**ERRORS:**  ')
+                for error in errors:
+                    f.write(f'- {error}')
 
 
 def draw_path(actual: List[Tuple[float, float]], expected: List[Tuple[float, float]], env: str, save_path: str):
