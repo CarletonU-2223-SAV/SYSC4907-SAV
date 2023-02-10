@@ -52,7 +52,7 @@ def analyze_collisions(data: Dict[str, any]):
             start_time = data[DATE][0]
             collision_time = data[DATE][i]
             delta = collision_time - start_time
-            position = f'({data[POS_AIRSIM][0]}, {data[POS_AIRSIM[1]]})'
+            position = f'({data[POS_AIRSIM][0]}, {data[POS_AIRSIM][1]})'
             errors.append(f'Collision detected at {data[DATE][i]},'
                           f' position {position} (after {delta.seconds} seconds).')
 
