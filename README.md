@@ -62,15 +62,11 @@ executables for MacOS and only some for Linux.
 
 1. Exit Ros with ctrl+c in the ROS console. Do this before closing Airsim, which should be relaunched for every test run to start from a known situation in Airsim.
 
-2. To create a new test route, download a standard installation of Python for the desktop (ROS' installation of it does not come with Tkinter). In a command prompt, navigate to the cloned project directory, go to src/mapping_navigation/scripts and execute "python TestGUI.py" to launch the route making GUI. The command "pip install Pillow" may need to be done first.
+2. To create a new test route, download a standard installation of Python for the desktop (ROS' installation of it does not come with Tkinter). In a command prompt, navigate to the cloned project directory, go to src/mapping_navigation/scripts and execute "python TestGUI.py" to launch the route making GUI. The command "pip install Pillow" and "pip install networkx" need to be done first.
 
-    > In the GUI, click "Create" followed by "straight road". Then click the new "RoadSegmentType.STRAIGHT" label to the right of the map. Then click "Create" follwed by "lane". Then click the new "[]" label under the previously selected RoadSegementType label. Then click "Create" then "path".  Now start clicking points on the map to add points. Repeat these steps for intersections and other paths that do not involve intersections.
+    > In the GUI, simply click on any red node illustrated on the map and the shortest path will be generated.
     > 
-    > **IMPORTANT**: Make sure your first point is where the vehicle starts in the AirSim environment
-    > 
-    > Afterwards, click the first "empty path" label to the right of the map. Then click all of the created points on the map. 
-    > 
-    > Click "File", "save coords", and create a new file under the src/mapping_navigation/paths directory.
+    > Click "File" then "save coords" to save your desired path.
 
 3. To use the new test route, add the path argument to the end of the roslaunch command: `roslaunch central_control full_system.launch path:=new_coords.pickle`
 

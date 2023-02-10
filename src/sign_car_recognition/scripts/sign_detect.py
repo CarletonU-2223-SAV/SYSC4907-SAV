@@ -2,7 +2,6 @@
 import pandas as pd
 import torch
 import rospy
-import airsim
 import numpy as np
 import cv2
 from sign_car_recognition.msg import DetectionResult, DetectionResults

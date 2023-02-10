@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
 
-import airsim
 import rospy
 import cv2
 import numpy as np
-
-from typing import List
 
 # ROS Image message
 from sensor_msgs.msg import Image, CompressedImage
 from sensors.msg import SceneDepth
 
+from common.bridge import get_bridge, SCENE_IMAGE, DEPTH_IMAGE
 
 DEPTH_RES = 256
 
@@ -38,23 +36,21 @@ def airpub():
     rospy.init_node('image_raw', anonymous=True)
     rate = rospy.Rate(10)  # 10hz
 
-    # connect to the AirSim simulator 
-    host_ip = rospy.get_param('/host_ip')
-    client = airsim.CarClient(ip=host_ip)
-    client.confirmConnection()
+    # connect to the AirSim simulator
+    sim = get_bridge()
 
     # saved = False
 
     while not rospy.is_shutdown():
         # get camera images from the car
-        responses: List[airsim.ImageResponse] = client.simGetImages([
+        responses = [
             # png format
-            airsim.ImageRequest(0, airsim.ImageType.Scene),
+            sim.get_image(0, SCENE_IMAGE),
             # scene vision image in uncompressed RGB array
-            airsim.ImageRequest(0, airsim.ImageType.Scene, False, False),
+            sim.get_image(0, SCENE_IMAGE),
             # Depth image, these are values between 0 and 1 that map to AirSim distances of (0-100)m
-            airsim.ImageRequest(0, airsim.ImageType.DepthVis, pixels_as_float=True)
-        ])
+            sim.get_image(0, DEPTH_IMAGE, pixels_as_float=True)
+        ]
 
         img_rgb_string = responses[UNCOMPRESSED_RGB].image_data_uint8
         # rospy.loginfo(responses[DEBUG])

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
-import airsim
 import rospy
 from geometry_msgs.msg import PoseStamped
+from common.bridge import get_bridge
 
 def airpub():
     pub = rospy.Publisher("airsimPose", PoseStamped, queue_size=1)
@@ -10,17 +10,14 @@ def airpub():
     rate = rospy.Rate(3)  # 3hz
 
     # connect to the AirSim simulator
-    host_ip = rospy.get_param('/host_ip')
-    client = airsim.CarClient(ip=host_ip)
-    client.confirmConnection()
+    sim = get_bridge()
 
     # start = time.time()
 
     while not rospy.is_shutdown():
         # get state of the car
-        car_state = client.getCarState()
-        pos = car_state.kinematics_estimated.position
-        orientation = car_state.kinematics_estimated.orientation
+        pos = sim.get_position()
+        orientation = sim.get_orientation()
         # milliseconds = (time.time() - start) * 1000
 
         # populate PoseStamped ros message

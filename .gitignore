@@ -14,9 +14,12 @@ catkin_ws/lib/
 catkin_ws/build_isolated/
 catkin_ws/devel_isolated/
 catkin_ws/*.pyc
-/.vs
+.vs
 .git
 **/airsim/
 src/cruise_control/scripts/speed_output.txt
 .idea
 
+src/ros_navigation/src/binvox maps/viewvox.exe
+src/ros_navigation/src/binvox maps/binvox.exe
+src/ros_navigation/src/binvox maps/glut32.dll

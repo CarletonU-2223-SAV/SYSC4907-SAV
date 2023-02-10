@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 
-import airsim
-
 import rospy
 from std_msgs.msg import Float64
+from common.bridge import get_bridge
 
 def speedometer():
     pub = rospy.Publisher('sensor/speed', Float64, queue_size=1)
@@ -11,13 +10,11 @@ def speedometer():
     rate = rospy.Rate(10)  # 10 Hz
 
     # connect to the AirSim simulator 
-    host_ip = rospy.get_param('/host_ip')
-    client = airsim.CarClient(ip=host_ip)
-    client.confirmConnection()
+    sim = get_bridge()
 
     while not rospy.is_shutdown():
         # Get the speed of the car
-        car_speed = client.getCarState().speed
+        car_speed = sim.get_speed()
         rospy.loginfo(car_speed)
         pub.publish(car_speed)
         rate.sleep()

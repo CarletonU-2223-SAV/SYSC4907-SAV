@@ -1,9 +1,8 @@
-import airsim
 import numpy as np
 import open3d as o3d
 import os
-import rospy
 from geometry_msgs.msg import Point32
+from common.bridge import get_bridge
 
 default_min_x = 1e+308
 default_max_x = -1e+308
@@ -23,11 +22,7 @@ class ClusterDetection:
         self.running_tests = False  # Set to true if running tests
         if self.running_tests:
             self.box_output_file = open(os.path.abspath(os.path.dirname(__file__)) + "/detected_boxes.txt", "w")
-
-        host_ip = rospy.get_param('/host_ip')
-
-        self.client = airsim.CarClient(ip=host_ip)
-        self.client.confirmConnection()
+        self.bridge = get_bridge()
 
     # Finds the bounding boxes of detected clusters in the point cloud. The returned
     # boxes are stored as a flat array in the with the box points in the following order:
@@ -71,7 +66,7 @@ class ClusterDetection:
         if self.running_tests:
             self.write_bounding_boxes_to_file(bounding_boxes)
 
-        car_pos = self.client.simGetGroundTruthKinematics("").position
+        car_pos = self.bridge.get_position()
         bounding_boxes.append(car_pos.x_val.real)
         bounding_boxes.append(car_pos.y_val.real)
         bounding_boxes.append(car_pos.z_val.real)
@@ -115,7 +110,7 @@ class ClusterDetection:
     # Writes the passed in boxes to a file used by tests
     def write_bounding_boxes_to_file(self, boxes: [float]):
 
-        car_pos = self.client.simGetGroundTruthKinematics("").position
+        car_pos = self.bridge.get_position()
 
         self.box_output_file.write("{},{},{},".format(car_pos.x_val.real, car_pos.y_val.real, car_pos.z_val.real))
 
