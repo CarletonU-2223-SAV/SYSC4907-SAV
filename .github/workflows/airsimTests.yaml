@@ -26,7 +26,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install Pillow
       - name: Run metrics on base test
-        run: python testing/AirSimTests/log_analyzer.py NH_auto_path_coords --pr-comment
+        run: python testing/AirSimTests/log_analyzer.py NH_auto_path_coords --pr-branch=${{ github.ref_name }}
       - name: Comment metrics if PR
         if: ${{ github.event_name == 'pull_request' }}
         uses: thollander/actions-comment-pull-request@v2

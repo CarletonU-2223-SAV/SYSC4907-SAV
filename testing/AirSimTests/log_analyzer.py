@@ -1,9 +1,9 @@
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Optional
 import MapSerializer as MapSerializer
-from Models import Point
+from Models import Point, RoadSegmentType
 from PIL import Image, ImageDraw, ImageColor
 
 MAX_STEERING = 1.0
@@ -52,9 +52,10 @@ def analyze_collisions(data: Dict[str, any]):
             start_time = data[DATE][0]
             collision_time = data[DATE][i]
             delta = collision_time - start_time
-            position = f'({data[POS_AIRSIM][0]}, {data[POS_AIRSIM][1]})'
+            position = f'({data[POS_AIRSIM][i][0]:.2f}, {data[POS_AIRSIM][i][1]:.2f})'
             errors.append(f'Collision detected at {data[DATE][i]},'
                           f' position {position} (after {delta.seconds} seconds).')
+            return
 
 
 def analyze_path(actual: List[Tuple[float, float]], expected: List[Tuple[float, float]]):
@@ -63,7 +64,7 @@ def analyze_path(actual: List[Tuple[float, float]], expected: List[Tuple[float, 
     metrics.append('Test metric: Measured 99%, expected 100%')
 
 
-def analyze(test_case: str, log_pr_message: bool):
+def analyze(test_case: str, pr_branch: Optional[str]):
     filepath = Path(__file__).parent / 'log' / f'{test_case}.txt'
     pickle = Path(__file__).parents[2] / 'src' / 'mapping_navigation' / 'paths' / f'{test_case}.pickle'
     pickle_map = MapSerializer.load_from_filename(pickle.__str__())
@@ -84,7 +85,7 @@ def analyze(test_case: str, log_pr_message: bool):
             line = line.strip()
             time, pos, steering, throttle, collision = line.split('|')
             x, y = [float(z) for z in pos.split(',')]
-            line_pt = Point(x, y, 0)
+            line_pt = Point(x, y, RoadSegmentType.STRAIGHT)
             data[DATE].append(datetime.strptime(time, '%Y-%m-%d %H:%M:%S'))
             data[POS_GUI].append(line_pt.point_to_gui_coords(ENV_IDS[env]))
             data[POS_AIRSIM].append((x, y))
@@ -96,11 +97,11 @@ def analyze(test_case: str, log_pr_message: bool):
 
     # draw_path(data[POS_GUI], pickle_map.paths[0].get_gui_coords(), env, f'{test_case}.png')  # Disable by default
 
-    if log_pr_message:
+    if pr_branch:
         # Running on GitHub for a PR, log metrics to a file
         pr_message_path = Path(__file__).parents[2] / 'pr_message.txt'
         with open(pr_message_path, 'w') as f:
-            f.write('### Analysis for branch ${{ github.ref_name }}  \n')
+            f.write(f'### Analysis for branch { pr_branch }  \n')
             for metric in metrics:
                 f.write(f'{metric}  ')
             f.write('\n')
@@ -128,10 +129,18 @@ def draw_path(actual: List[Tuple[float, float]], expected: List[Tuple[float, flo
 
 
 if __name__ == '__main__':
-    if len(sys.argv) > 3:
+    if len(sys.argv) not in [2, 3]:
         raise Exception('Test config error. Incorrect arguments supplied to log_analyzer.py.')
 
     args = sys.argv[1:]
-    is_pr = PR_COMMENT_FLAG in args
-    case = args[0] if args[0] != PR_COMMENT_FLAG else args[1]
-    analyze(case, is_pr)
+    branch = None
+    case = args[0]
+    if len(args) > 1:
+        # PR flag is set
+        for arg in args:
+            if PR_COMMENT_FLAG in arg:
+                branch = arg.split('=')[1]
+            else:
+                case = arg
+
+    analyze(case, branch)
