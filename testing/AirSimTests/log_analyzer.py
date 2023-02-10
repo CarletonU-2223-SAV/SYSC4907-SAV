@@ -95,7 +95,8 @@ def analyze(test_case: str, log_pr_message: bool):
         # Running on GitHub for a PR, log metrics to a file
         pr_message_path = Path(__file__).parents[2] / 'pr_message.txt'
         with open(pr_message_path, 'w') as f:
-            f.write('Hello world!')
+            f.write('**Testing** some [markdown](https://github.com/CarletonU-2223-SAV/SYSC4907-SAV/)')
+            f.write('# Header!!')
 
 
 def draw_path(actual: List[Tuple[float, float]], expected: List[Tuple[float, float]], env: str, save_path: str):
