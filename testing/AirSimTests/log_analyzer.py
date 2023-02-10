@@ -102,7 +102,7 @@ def analyze(test_case: str, pr_branch: Optional[str]):
         pr_message_path = Path(__file__).parents[2] / 'pr_message.txt'
         with open(pr_message_path, 'w') as f:
             branch_name, commit_hash = pr_branch.split(',')
-            f.write(f'### Analysis for commit { commit_hash[:6] } on branch { branch_name }\n')
+            f.write(f'### Analysis for commit { commit_hash[:7] } on branch { branch_name }\n')
             for metric in metrics:
                 f.write(f'{metric}\n')
             f.write('\n')
