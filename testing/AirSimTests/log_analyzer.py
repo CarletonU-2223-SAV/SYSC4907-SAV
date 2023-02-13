@@ -32,14 +32,14 @@ COLLISIONS = 'collided'
 PR_COMMENT_FLAG = '--pr-branch'
 
 metrics = []
-errors = []
+warnings = []
 
 
 def analyze_time(times: List[datetime]):
     delta = (datetime.now() - times[0]).days
     if delta > 7:
         # Give warning if test log is over a week old
-        errors.append(f'Test log is old ({delta} days)')
+        warnings.append(f'Test log is old ({delta} days)')
 
 
 def analyze_steering(val: str):
@@ -55,7 +55,7 @@ def analyze_collisions(data: Dict[str, any]):
             collision_time = data[DATE][i]
             delta = collision_time - start_time
             position = f'({data[POS_AIRSIM][i][0]:.2f}, {data[POS_AIRSIM][i][1]:.2f})'
-            errors.append(f'Collision detected at {data[DATE][i]},'
+            warnings.append(f'Collision detected at {data[DATE][i]},'
                           f' position {position} (after {delta.seconds} seconds).')
             return
 
@@ -75,7 +75,7 @@ def analyze_path(actual: List[Point2D], expected: List[Point2D]):
 
         # Estimate area as a rectangle bounded by distance between point and segment with last point
         area += distance * (point.distance(actual[i]))
-    metrics.append(f'Area between target and actual path is {area}. Target value is {TARGET_AREA}')
+    metrics.append(f'Area between target and actual path is {area:.2f}. Target value is {TARGET_AREA:.2f}')
 
 
 def analyze(test_case: str, pr_branch: Optional[str]):
@@ -119,10 +119,10 @@ def analyze(test_case: str, pr_branch: Optional[str]):
             for metric in metrics:
                 f.write(f'- {metric}\n')
             f.write('\n')
-            if errors:
-                f.write('**ERRORS:**\n')
-                for error in errors:
-                    f.write(f'- {error}\n')
+            if warnings:
+                f.write('**Warnings:**\n')
+                for warning in warnings:
+                    f.write(f'- {warning}\n')
     else:
         # Draw paths if script is manually run
         draw_path(data[POS_GUI], pickle_map.paths[0].get_gui_coords(), env, f'{test_case}.png')
