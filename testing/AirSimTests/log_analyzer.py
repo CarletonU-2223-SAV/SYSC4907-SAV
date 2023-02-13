@@ -1,4 +1,3 @@
-import math
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -6,7 +5,9 @@ from typing import List, Tuple, Dict, Optional
 import MapSerializer as MapSerializer
 from Models import Point as PointModel, RoadSegmentType
 from PIL import Image, ImageDraw, ImageColor
+from sympy import Point2D, Point, Segment
 
+TARGET_AREA = 100.0
 MAX_STEERING = 1.0
 NH = 'NH'
 CITY = 'CITY'
@@ -29,8 +30,6 @@ THROTTLE = 'throttle'
 COLLISIONS = 'collided'
 
 PR_COMMENT_FLAG = '--pr-branch'
-
-Point = Tuple[float, float]
 
 metrics = []
 errors = []
@@ -61,58 +60,22 @@ def analyze_collisions(data: Dict[str, any]):
             return
 
 
-def analyze_path(actual: List[Point], expected: List[Point]):
+def analyze_path(actual: List[Point2D], expected: List[Point2D]):
     if not actual or not expected:
         raise Exception('Could not find points to analyze')
 
-    for point in actual:
-        line_1, line_2 = find_nearest_points(expected, point)
-        (line_1x, line_1y), (line_2x, line_2y) = (line_1, line_2)
-        point_x, point_y = point
+    segments = []
+    for i in range(len(expected) - 1):
+        segments.append(Segment(expected[i], expected[i + 1]))
 
-        line_delta_x = line_2x - line_1x
-        line_delta_y = line_2y - line_1y
-        line_slope = line_delta_y / line_delta_x
+    area = 0.0
+    for i, point in enumerate(actual[1:]):
+        # Get shortest distance to pre-computed segments
+        distance = min([s.distance(point) for s in segments])
 
-        distance = (abs(line_delta_x * (line_1y - point_y) - (line_1x - point_x) * line_delta_y)
-                    / distance_between_points(line_1, line_2))
-
-        intersection_slope = -1 / line_slope
-        delta_x = distance * math.cos(intersection_slope)
-        delta_y = distance * math.sin(intersection_slope)
-
-        intersection_x = point_x - delta_x
-        intersection_y = point_y - delta_y
-
-        if ((line_1x < intersection_x < line_2x and line_1y < intersection_y < line_2y)
-                or (line_2x < intersection_x < line_1x and line_2y < intersection_y < line_1y)):
-            # Point is between lines, good
-            print(f'point ({point}) is between ({line_1}) and ({line_2})')
-        else:
-            # Point is past the end of one point
-            print(f'point ({point}) is NOT between ({line_1}) and ({line_2})')
-
-
-def find_nearest_points(path: List[Point], point: Point) -> Tuple[Point, Point]:
-    # Find the nearest point
-    min_distance = min(path, key=lambda crumb: distance_between_points(crumb, point))
-    min_index = path.index(min_distance)
-
-    if 0 < min_index < len(path):
-        # Find nearest neighbour point
-        neighbours = [path[min_index - 1], path[min_index + 1]]
-        min_neighbour = min(neighbours, key=lambda crumb: distance_between_points(crumb, point))
-    else:
-        # Nearest neighbour point is only adjacent point
-        index = 1 if min_index == 0 else (len(path) - 1)
-        min_neighbour = path[index]
-    return min_distance, min_neighbour
-
-
-def distance_between_points(point_1: Tuple[float, float], point_2: Tuple[float, float]) -> float:
-    point_1x, point_1y = point_1
-    point_2x, point_2y = point_2
-    return math.sqrt((point_1x - point_2x) ** 2 + (point_1y - point_2y) ** 2)
+        # Estimate area as a rectangle bounded by distance between point and segment with last point
+        area += distance * (point.distance(actual[i]))
+    metrics.append(f'Area between target and actual path is {area}. Target value is {TARGET_AREA}')
 
 
 def analyze(test_case: str, pr_branch: Optional[str]):
@@ -139,10 +102,10 @@ def analyze(test_case: str, pr_branch: Optional[str]):
             line_pt = PointModel(x, y, RoadSegmentType.STRAIGHT)
             data[DATE].append(datetime.strptime(time, '%Y-%m-%d %H:%M:%S'))
             data[POS_GUI].append(line_pt.point_to_gui_coords(ENV_IDS[env]))
-            data[POS_AIRSIM].append((x, y))
+            data[POS_AIRSIM].append(Point(x, y, evaluate=False))
             data[COLLISIONS].append(collision == 'True')
 
-    pickle_path = [(x, y) for x, y, _ in pickle_map.convert_path(0)]
+    pickle_path = [Point(x, y, evaluate=False) for x, y, _ in pickle_map.convert_path(0)]
     analyze_time(data[DATE])
     analyze_path(data[POS_AIRSIM], pickle_path)
     analyze_collisions(data)
