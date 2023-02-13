@@ -36,8 +36,8 @@ metrics = []
 errors = []
 
 
-def analyze_time(times: List[str]):
-    delta = (datetime.now() - datetime.strptime(times[0], '%Y-%m-%d %H:%M:%S')).days
+def analyze_time(times: List[datetime]):
+    delta = (datetime.now() - times[0]).days
     if delta > 7:
         # Give warning if test log is over a week old
         errors.append(f'Test log is old ({delta} days)')
