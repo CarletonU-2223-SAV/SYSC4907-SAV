@@ -13,7 +13,7 @@ class AirSimBridge(Bridge):
 
         self.client = airsim.CarClient(ip=host_ip)
         self.client.confirmConnection()
-        self.client.enableApiControl(True)
+        self.client.enableApiControl(False)
 
     def get_image(self, camera_id: int, image_type: int, pixels_as_float=False, compress=False):
         return self.client.simGetImages(
