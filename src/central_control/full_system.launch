@@ -26,6 +26,6 @@
   <node name="car_image_raw" pkg="sensors" type="car_image_raw.py" />
   <node name="car_pose" pkg="sensors" type="car_pose.py" />
   <node name="segmented_image" pkg="sensors" type="segmented_image.py" />
-  <node name="new_object_detect" pkg="new_lidar_object_detect" type="new_lidar_object_detect.py"/>
+  <!--node name="new_object_detect" pkg="new_lidar_object_detect" type="new_lidar_object_detect.py"/> -->
   <node name="logging" pkg="sensors" type="vehicle_logging.py" if="$(arg log)" /> <!-- Launch logging node if flag is set -->
 </launch>

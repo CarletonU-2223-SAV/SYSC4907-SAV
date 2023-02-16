@@ -8,7 +8,7 @@ from lidar_processor import LidarProcessor
 q_size = 15
 class NewLidarObjectHandler:
     def __int__(self):
-        self.lidarPub = rospy.Publisher("lidar_data", Float64MultiArray, queue_size=q_size)
+        self.lidarPub = rospy.Publisher("new_lidar_data", Float64MultiArray, queue_size=q_size)
         self.lidar_processor = LidarProcessor()
 
     def listener(self):

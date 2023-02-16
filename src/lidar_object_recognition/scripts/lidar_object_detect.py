@@ -5,7 +5,7 @@ from std_msgs.msg import Float64MultiArray
 from cluster_detection import ClusterDetection
 
 # Size of the queue for object detection
-q_size = 10
+q_size = 15
 
 
 class LidarObjectDetect:
