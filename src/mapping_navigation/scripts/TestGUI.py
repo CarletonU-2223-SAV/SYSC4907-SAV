@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import math
 import tkinter as tk
+from typing import List
+
 import networkx as nx
 import MapSerializer as MS
 from PIL import ImageTk, Image
@@ -287,8 +289,15 @@ C_pointList = [C_startpoint,
 ]
 
 # Find the shortest path using dijkstra
-def find_shortest_path(graph: nx.Graph(), start_point_id: Point, end_point_id: Point) -> list:
-    return nx.dijkstra_path(graph, start_point_id, end_point_id)
+def find_shortest_path(graph: nx.Graph(), start_node: Point, end_node: Point) -> List:
+    return nx.dijkstra_path(graph, start_node, end_node)
+
+def find_closest_node(end_node: Point, node_list: List[Point]) -> Point:
+    closest_node: Point = node_list[0]
+    for node in node_list:
+        if find_edge_weight(end_node, node) < find_edge_weight(end_node, closest_node):
+            closest_node = node
+    return closest_node
 
 # create path from clicking on canvas
 def handle_canvas_m1(event):
@@ -300,30 +309,15 @@ def handle_canvas_m1(event):
     if not(map_model.empty()):
         map_model.delete_path(0)
 
-    #choosing node to travel too
-    point_found = False
-    endpoint: Point = Point(-1, -1, RoadSegmentType.STRAIGHT)
-    if current_image == CITY:
-        for point in C_pointList:
-            if abs(x - point.x) < 10 and abs(y - point.y) < 10:
-                endpoint = point
-                point_found = True
-                break
-    else:
-        for point in NH_pointList:
-            if abs(x - point.x) < 10 and abs(y - point.y) < 10:
-                endpoint = point
-                point_found = True
-                break
+    #adding chosen node to graph
+    end_point: Point = Point(x, y, RoadSegmentType.STRAIGHT)
+    closest_point: Point = find_closest_node(end_point, NH_pointList)
+    NH_G.add_edge(end_point, closest_point, weight=find_edge_weight(end_point, closest_point))
 
-    if point_found:
-        if current_image == CITY:
-            path = find_shortest_path(C_G, C_startpoint, endpoint)
-        else:
-            path = find_shortest_path(NH_G, NH_startpoint, endpoint)
+    if current_image == CITY:
+        path = find_shortest_path(C_G, C_startpoint, end_point)
     else:
-        #if no node is clicked
-        return
+        path = find_shortest_path(NH_G, NH_startpoint, end_point)
 
     #create line on canvas showing generated path
     draw_line(path)
@@ -334,7 +328,7 @@ def handle_canvas_m1(event):
     map_model.add_path(lane)
 
 # draws path onto canvas
-def draw_line(path: list):
+def draw_line(path: List):
     canvas.delete("line")
     for i in range(len(path)):
         if i < len(path) - 1:
