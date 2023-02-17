@@ -164,6 +164,9 @@ class MapModel:
     def add_path(self, new_path: Lane):
         self.paths.append(new_path)
 
+    def get_path(self) -> List[Point]:
+        return self.paths[0].points
+
     def delete_path(self, index):
         del self.paths[index]
 
@@ -197,9 +200,9 @@ class MapModel:
         x_startpoint_nh = -1 * MapModel.AirSim_correction_factor[NH][X_COORD]
         x_startpoint_city = -1 * MapModel.AirSim_correction_factor[CITY][X_COORD]
 
-        if abs(x_startpoint_path - x_startpoint_nh) < 10:
+        if x_startpoint_path == x_startpoint_nh:
             map_choice = NH
-        elif abs(x_startpoint_path - x_startpoint_city) < 10:
+        elif x_startpoint_path == x_startpoint_city:
             map_choice = CITY
         else:
             map_choice = NH
