@@ -1,9 +1,3 @@
-default_min_x = 1e+308
-default_max_x = -1e+308
-default_min_y = 1e+308
-default_max_y = -1e+308
-default_min_z = 1e+308
-default_max_z = -1e+308
 
 
 def find_aabb(points: [float], result: [float]):

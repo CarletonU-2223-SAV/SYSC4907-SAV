@@ -37,7 +37,7 @@ class ClusterDetection:
                 translated_points.append([point.x, point.y, point.z])
 
         o3d_point_cloud.points = o3d.utility.Vector3dVector(translated_points)
-        labels = np.array(o3d_point_cloud.cluster_dbscan(self.epsilon, self.min_num_points, print_progress=False))
+        labels = np.array(o3d_point_cloud.cluster_dbscan(self.epsilon, self.min_num_points, print_progress=True))
 
         cluster_dic = dict()
         point_index = 0
