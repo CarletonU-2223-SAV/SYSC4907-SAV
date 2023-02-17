@@ -292,8 +292,9 @@ C_pointList = [C_startpoint,
 def find_shortest_path(graph: nx.Graph(), start_node: Point, end_node: Point) -> List:
     return nx.dijkstra_path(graph, start_node, end_node)
 
+# Find the closest node to chosen destination
 def find_closest_node(end_node: Point, node_list: List[Point]) -> Point:
-    closest_node: Point = node_list[0]
+    closest_node: Point = Point(10000,10000, RoadSegmentType.STRAIGHT)
     for node in node_list:
         if find_edge_weight(end_node, node) < find_edge_weight(end_node, closest_node):
             closest_node = node
