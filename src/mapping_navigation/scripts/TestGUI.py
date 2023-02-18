@@ -292,6 +292,27 @@ C_pointList = [C_startpoint,
 def find_shortest_path(graph: nx.Graph(), start_node: Point, end_node: Point) -> List:
     return nx.dijkstra_path(graph, start_node, end_node)
 
+
+def optimize_shortest_path(path: List) -> List:
+    old_path = path.copy()
+    path.remove(path[len(path)-2])
+    new_path = path
+    old_path_length = 0
+    new_path_length = 0
+
+    for index, nodes in enumerate(old_path):
+        if index != len(old_path)-1:
+            old_path_length += find_edge_weight(old_path[index], old_path[index+1])
+
+    for index, nodes in enumerate(new_path):
+        if index != len(new_path)-1:
+            new_path_length += find_edge_weight(new_path[index], new_path[index+1])
+
+    if new_path_length > old_path_length:
+        return old_path
+    else:
+        return new_path
+
 # Find the closest node to chosen destination
 def find_closest_node(end_node: Point, node_list: List[Point]) -> Point:
     closest_node: Point = Point(10000,10000, RoadSegmentType.STRAIGHT)
@@ -312,16 +333,21 @@ def handle_canvas_m1(event):
 
     #adding chosen node to graph
     end_point: Point = Point(x, y, RoadSegmentType.STRAIGHT)
-    closest_point: Point = find_closest_node(end_point, NH_pointList)
-    NH_G.add_edge(end_point, closest_point, weight=find_edge_weight(end_point, closest_point))
+    path = []
 
     if current_image == CITY:
+        closest_point: Point = find_closest_node(end_point, C_pointList)
+        C_G.add_edge(end_point, closest_point, weight=find_edge_weight(end_point, closest_point))
         path = find_shortest_path(C_G, C_startpoint, end_point)
-    else:
+    elif current_image == NH:
+        closest_point: Point = find_closest_node(end_point, NH_pointList)
+        NH_G.add_edge(end_point, closest_point, weight=find_edge_weight(end_point, closest_point))
         path = find_shortest_path(NH_G, NH_startpoint, end_point)
 
+    optimized_path = optimize_shortest_path(path)
+
     #create line on canvas showing generated path
-    draw_line(path)
+    draw_line(optimized_path)
 
     #add path to map_model for navigation
     lane: Lane = Lane()
