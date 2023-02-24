@@ -24,7 +24,10 @@ class Navigation:
 
     def __init__(self, path: List[Tuple[float, float, RoadSegmentType]], look_ahead_distance: float,
                  look_forward_gain: float, wheel_base: float):
+        rospy.init_node('navigation', anonymous=True)
         self.navigation_pub = rospy.Publisher('navigation', PathData, queue_size=10)
+        rospy.Subscriber('airsimPose', PoseStamped, self.handle_gps_data)
+        rospy.Subscriber("sensor/speed", Float64, self.handle_speed_data)
         self.last_index = 0
         self.target_index = 0
         self.path = []
@@ -35,31 +38,27 @@ class Navigation:
         self.car_state = CarState(wheel_base)
 
     def listener(self):
-        rospy.init_node('navigation', anonymous=True)
-        rospy.Subscriber('airsimPose', PoseStamped, self.handle_gps_data)
-        rospy.Subscriber("sensor/speed", Float64, self.handle_speed_data)
         rate = rospy.Rate(10)
         # Once to get initial starting index
         self.target_index = self.navigator.search_target_index(self.car_state)[0]
 
-        while not rospy.is_shutdown():
-            if len(self.path) - 1 > self.target_index:
-                # Get the closest point to get the current road type.
-                closest_point_index = self.find_nearest_point()
-                # Look and see if a new segment is coming up ahead.
-                next_segment = self.check_ahead(closest_point_index)
+        while len(self.path) - 1 > self.target_index:
+            # Get the closest point to get the current road type.
+            closest_point_index = self.find_nearest_point()
+            # Look and see if a new segment is coming up ahead.
+            next_segment = self.check_ahead(closest_point_index)
 
-                nav_msg = PathData()
-                nav_msg.steering_angle = self.get_steering_angle()
-                nav_msg.current_segment = self.path[closest_point_index].segment_type.value
-                nav_msg.next_segment = next_segment.value
+            nav_msg = PathData()
+            nav_msg.steering_angle = self.get_steering_angle()
+            nav_msg.current_segment = self.path[closest_point_index].segment_type.value
+            nav_msg.next_segment = next_segment.value
 
-                self.navigation_pub.publish(nav_msg)
-            else:
-                rospy.loginfo('Done route')
-                self.navigation_pub.publish(PathData(0, 0, 3))
-                # rospy.sigal_shutdown("Done route")
+            self.navigation_pub.publish(nav_msg)
             rate.sleep()
+
+        rospy.loginfo('Done route')
+        self.navigation_pub.publish(PathData(0, 0, 4))
+        rospy.spin()
 
     def handle_gps_data(self, position: PoseStamped):
         curr_point = Point((position.pose.position.x, position.pose.position.y))

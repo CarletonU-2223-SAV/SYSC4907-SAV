@@ -7,7 +7,9 @@
 
   <arg name="log" default="false" />
 
-  <node name="central_control" pkg="central_control" type="central_control.py" />
+   <!-- Making central control required results in ROS shutting down after the entire path has been navigated.
+      This is needed for automated testing. -->
+  <node name="central_control" pkg="central_control" type="central_control.py" required="true" />
   <node name="lane_keep_assist" pkg="lane_keep_assist" type="send_lane.py" />
 
 <!-- We're not using this node for now because the sign and car recognition are the same node for now -->
@@ -19,9 +21,7 @@
   <node name="cruise_control" pkg="cruise_control" type="cruise_control.py" />
   <node name="speedometer" pkg="sensors" type="speedometer.py" />
 
-   <!-- Making navigation node required results in ROS shutting down after the entire path has been navigated.
-        This is needed for automated testing. -->
-  <node name="navigation" pkg="mapping_navigation" type="navigation.py" required = "true"/>
+  <node name="navigation" pkg="mapping_navigation" type="navigation.py" />
 
   <node name="lidar" pkg="sensors" type="lidar.py" />
   <node name="car_image_raw" pkg="sensors" type="car_image_raw.py" />

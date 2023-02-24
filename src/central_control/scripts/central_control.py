@@ -78,7 +78,7 @@ class StopState(Enum):
 
 
 ROADWARNINGSPEEDS = {RoadWarning.TURN_AHEAD: 2.5, RoadWarning.INTERSECTION_AHEAD: 2.5,
-                     RoadWarning.STRAIGHT_ROAD_AHEAD: 5}
+                     RoadWarning.STRAIGHT_ROAD_AHEAD: 5, RoadWarning.END_OF_PATH: 0}
 ROADSEGMENTSPEEDS = {RoadSegmentType.STRAIGHT: 5, RoadSegmentType.INTERSECTION: 2.5, RoadSegmentType.TURN: 2.5}
 
 INITIAL_COOLDOWN = 8
@@ -173,7 +173,7 @@ class CentralControl:
         MID_X = IMAGE_WIDTH / 2
 
         rate = rospy.Rate(10)  # 10hz
-        while not rospy.is_shutdown():
+        while self.next_road_segment != RoadWarning.END_OF_PATH:
             # TODO: some intelligent decision making process here?
             self.avoid.clear()
 
@@ -304,6 +304,13 @@ class CentralControl:
 
             rate.sleep()
             self.tick += 1
+
+        # End of path reached, wait until stopped before shutting down
+        self.car_controls.brake = HOLD_BRAKE
+        self.car_controls.throttle = STOP_THROTTLE
+        self.bridge.set_controls(self.car_controls)
+        while self.speed != 0:
+            rate.sleep()
 
     def handle_lane_data(self, lane_data: LaneStatus):
         """

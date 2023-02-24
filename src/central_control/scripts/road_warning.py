@@ -7,3 +7,4 @@ class RoadWarning(Enum):
     TURN_AHEAD = 1
     INTERSECTION_AHEAD = 2
     SAME_AHEAD = 3
+    END_OF_PATH = 4
