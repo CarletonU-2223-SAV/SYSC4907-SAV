@@ -11,5 +11,13 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-      - name: Set up container and run path
-        run: docker build .
+      - name: Download AirSim
+        run: |
+          wget https://github.com/microsoft/AirSim/releases/download/v1.8.1/AirSimNH.zip -q -O AirSimNH.zip
+          unzip AirSimNH.zip
+      - name: Build Docker Container for ROS
+        run: docker build -t sav .
+      - name: Run the test path
+        run: |
+          ./run_airsim_image_binary.sh sav AirSimNH/LinuxNoEditor/AirSimNH.sh -- headless
+          docker run -it sav ./run_ros.bash
