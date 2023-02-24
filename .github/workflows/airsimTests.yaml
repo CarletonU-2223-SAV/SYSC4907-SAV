@@ -11,22 +11,18 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-      - name: Set up Python 3.8
-        uses: actions/setup-python@v4
+      - name: Set up ROS
+        uses: ros-tooling/setup-ros@v0.3
         with:
-          python-version: "3.8"
-      - name: Set up Pythonpath
+          required-ros-distributions: noetic
+      - name: Download AirSim NH
         run: |
-          echo "PYTHONPATH=${PYTHONPATH}:${GITHUB_WORKSPACE}/src/central_control/scripts:${GITHUB_WORKSPACE}/src/cruise_control/scripts:${GITHUB_WORKSPACE}/src/lane_keep_assist/scripts:${GITHUB_WORKSPACE}/src/lidar_object_recognition/scripts:${GITHUB_WORKSPACE}/src/mapping_navigation/scripts:${GITHUB_WORKSPACE}/src/sensors/scripts:${GITHUB_WORKSPACE}/src/sign_car_recognition/scripts" >> $GITHUB_ENV
-      - name: Install dependencies
+          mkdir AirSim
+          wget https://github.com/microsoft/AirSim/releases/download/v1.8.1/AirSimNH.zip
+          unzip AirSimNH.zip
+      - name: Run AirSim
         run: |
-          python -m pip install --upgrade pip
-          pip install Pillow
-          pip install -r dependencies.txt
-      - name: Run metrics on base test
+          ./AirSimNH/LinuxNoEditor/AirSimNH.sh -- headless
+      - name: Run system
         run: |
-          python testing/AirSimTests/log_analyzer.py NH_auto_path_coords --pr-branch=${{ github.event.pull_request.head.ref }},${{ github.event.pull_request.head.sha }}
-      - name: Comment metrics
-        uses: thollander/actions-comment-pull-request@v2
-        with:
-          filePath: pr_message.txt
+          ./run_path.sh
