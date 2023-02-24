@@ -11,18 +11,5 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-      - name: Set up ROS
-        uses: ros-tooling/setup-ros@v0.3
-        with:
-          required-ros-distributions: noetic
-      - name: Download AirSim NH
-        run: |
-          mkdir AirSim
-          wget https://github.com/microsoft/AirSim/releases/download/v1.8.1/AirSimNH.zip
-          unzip AirSimNH.zip
-      - name: Run AirSim
-        run: |
-          ./AirSimNH/LinuxNoEditor/AirSimNH.sh -- headless
-      - name: Run system
-        run: |
-          ./run_path.sh
+      - name: Set up container and run path
+        run: docker build

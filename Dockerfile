@@ -12,7 +12,14 @@ COPY dependencies.txt .
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
+# Download and run AirSim
+RUN bash wget https://github.com/microsoft/AirSim/releases/download/v1.8.1/AirSimNH.zip
+RUN bash unzip AirSimNH.zip
+
 # Copy project files
 COPY . /ros_ws
 WORKDIR /ros_ws
-RUN bash bash_scripts/run_and_check_tests.sh
+RUN bash ./AirSimNH/LinuxNoEditor/AirSimNH.sh -- headless
+RUN bash ./opt/ros/noetic/setup.bash
+RUN bash catkin_make
+RUN bash roslaunch central_control full_system.launch
