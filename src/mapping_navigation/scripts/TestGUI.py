@@ -7,6 +7,7 @@ import networkx as nx
 import MapSerializer as MS
 from PIL import ImageTk, Image
 from Models import RoadSegmentType, MapModel, Lane, Point
+from sympy import Segment
 
 
 CITY = 1
@@ -319,6 +320,14 @@ def find_closest_node(end_node: Point, node_list: List[Point]) -> Point:
     for node in node_list:
         if find_edge_weight(end_node, node) < find_edge_weight(end_node, closest_node):
             closest_node = node
+
+    # get neighbours of closest_node and compare the distance from end_node to edges of neighbour nodes
+    # edge closest to end_node will be node
+    segments = []
+    for neighbour_node in NH_G.adj(closest_node):
+        segments.append(Segment(closest_node, neighbour_node).di)
+
+
     return closest_node
 
 # create path from clicking on canvas
@@ -344,10 +353,10 @@ def handle_canvas_m1(event):
         NH_G.add_edge(end_point, closest_point, weight=find_edge_weight(end_point, closest_point))
         path = find_shortest_path(NH_G, NH_startpoint, end_point)
 
-    optimized_path = optimize_shortest_path(path)
+    # optimized_path = optimize_shortest_path(path)
 
     #create line on canvas showing generated path
-    draw_line(optimized_path)
+    draw_line(path)
 
     #add path to map_model for navigation
     lane: Lane = Lane()
