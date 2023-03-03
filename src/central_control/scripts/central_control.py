@@ -81,7 +81,7 @@ ROADWARNINGSPEEDS = {RoadWarning.TURN_AHEAD: 2.5, RoadWarning.INTERSECTION_AHEAD
                      RoadWarning.STRAIGHT_ROAD_AHEAD: 5, RoadWarning.END_OF_PATH: 0}
 ROADSEGMENTSPEEDS = {RoadSegmentType.STRAIGHT: 5, RoadSegmentType.INTERSECTION: 2.5, RoadSegmentType.TURN: 2.5}
 
-INITIAL_COOLDOWN = 8
+INITIAL_COOLDOWN = 10
 INITIAL_SPEED = 0
 
 IMAGE_WIDTH = 640
@@ -102,7 +102,7 @@ LEFT_TURN_ANGLE = -0.8
 RIGHT_TURN_ANGLE = 0.8
 MAX_TURN_ANGLE = 1.0
 
-STOPPED_SPEED = 0.001
+STOPPED_SPEED = 0
 HOLD_BRAKE = 1
 RELEASE_BRAKE = 0
 STOP_THROTTLE = 0
@@ -194,6 +194,9 @@ class CentralControl:
                     # Heuristic values
                     if sign.depth < REACT_DEPTH:
                         self.stop_state = StopState.STOPPING
+                        self.car_controls.throttle = STOP_THROTTLE
+                        self.car_controls.brake = HOLD_BRAKE
+                        print("A")
                     elif sign.depth <= LOOKAHEAD_DEPTH:
                         self.cc_state.add(CCState.STREET_RULE)
                         self.stop_state = StopState.DETECTED
@@ -267,7 +270,7 @@ class CentralControl:
                     self.car_controls.brake = HOLD_BRAKE
                     self.car_controls.throttle = STOP_THROTTLE
 
-                    if self.speed < STOPPED_SPEED:
+                    if self.speed == STOPPED_SPEED:
                         # When you are stopped, you can start the resuming process
                         self.stop_state = StopState.RESUMING
                 elif self.stop_state == StopState.RESUMING:
@@ -447,7 +450,7 @@ class CentralControl:
         self.sign_data.clear()
         detection_list: List[DetectionResult] = res.detection_results
         for detection in detection_list:
-            if detection.class_num == 11 and detection.depth < 40 and detection.confidence > 0.4:
+            if detection.class_num == 11 and detection.depth < 50 and detection.confidence > 0.2:
                 # Stop sign. Depth is likely going to be smaller than 25 because of the image resolution
                 self.sign_data.append(detection)
 

@@ -1,10 +1,14 @@
+#!/usr/bin/env python3
 import cv2
 import numpy as np
 import rospy
+import torch
+import pandas as pd
 from sensors.msg import SceneDepth
 from sign_car_recognition.msg import DetectionResults, DetectionResult
 from typing import List, Tuple
 import math
+from pathlib import Path
 
 DEPTH_RES = 256
 MAX_DEPTH = 100
@@ -27,7 +31,10 @@ NAME = 6
 
 class StopSignDetector:
     def __init__(self):
-        self.stop_cascade = cv2.CascadeClassifier('stop_sign.xml')
+        path = Path(__file__).parent
+        self.stop_cascade = cv2.CascadeClassifier(str(path/'stop_sign.xml'))
+        self.model = torch.hub.load('ultralytics/yolov5', 'yolov5s')
+        self.model.eval()
         self.pub = rospy.Publisher("stop_sign_detection", DetectionResults, queue_size=1)
         rospy.init_node('new_stop_sign_detector', anonymous=True)
 
@@ -37,6 +44,7 @@ class StopSignDetector:
 
     def handle_image(self, combine: SceneDepth):
         img1d = np.frombuffer(combine.scene.data, dtype=np.uint8)
+        #img_imcode = cv2.imdecode(img1d, cv2.IMREAD_COLOR)
         img_rgb = img1d.reshape(combine.scene.height, combine.scene.width, 3)
         res: List[DetectionResult] = self.detect_objects(img_rgb)
 
@@ -73,14 +81,12 @@ class StopSignDetector:
 
     def detect_objects(self, img_rgb):
         # return detection results consisting of bounding boxes and classes
-        gray_img = cv2.imdecode(img_rgb, cv2.IMREAD_COLOR)
-        gray = cv2.cvtColor(gray_img, cv2.COLOR_BGR2GRAY)
-        stops = self.stop_cascade.detectMultiScale(gray, 1.3, 5)
+        results = self.model(img_rgb)
+        results.print()
         res_list: List[Tuple[float, float, float, float, float, int, str]]
-        res_list = stops.pandas().xyxy[0].to_numpy().tolist()
-
-        for (x, y, w, h) in stops:
-            cv2.rectangle(img_rgb, (x, y), (x + w, y + h), GREEN, 2)
+        '''gray = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)
+        stops = self.stop_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(20, 20))'''
+        res_list = results.pandas().xyxy[0].to_numpy().tolist()
 
         detect_results = []
         # important detection classes we care about
@@ -103,6 +109,7 @@ class StopSignDetector:
             detect_results.append(dr)
 
         return detect_results
+
 
 if __name__ == "__main__":
     stop_sign_detect = StopSignDetector()
