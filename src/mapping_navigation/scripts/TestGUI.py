@@ -7,12 +7,12 @@ import networkx as nx
 import MapSerializer as MS
 from PIL import ImageTk, Image
 from Models import RoadSegmentType, MapModel, Lane, Point
-from sympy import Segment
-
+from sympy import Point as Point2, Segment
 
 CITY = 1
 NH = 2
 current_image = NH
+dest_node: Point = Point(None, None, RoadSegmentType.STRAIGHT)
 map_model: MapModel = MapModel()
 
 # Create a graph
@@ -293,67 +293,76 @@ C_pointList = [C_startpoint,
 def find_shortest_path(graph: nx.Graph(), start_node: Point, end_node: Point) -> List:
     return nx.dijkstra_path(graph, start_node, end_node)
 
+# Add destination node to graph
+def add_dest_node(graph: nx.Graph(), end_node: Point, node_list: List[Point]):
 
-def optimize_shortest_path(path: List) -> List:
-    old_path = path.copy()
-    path.remove(path[len(path)-2])
-    new_path = path
-    old_path_length = 0
-    new_path_length = 0
+    closest_edge = None
+    closest_distance = 100000
 
-    for index, nodes in enumerate(old_path):
-        if index != len(old_path)-1:
-            old_path_length += find_edge_weight(old_path[index], old_path[index+1])
+    end_point = Point2(end_node.x, end_node.y)
 
-    for index, nodes in enumerate(new_path):
-        if index != len(new_path)-1:
-            new_path_length += find_edge_weight(new_path[index], new_path[index+1])
+    for edge in graph.edges():
 
-    if new_path_length > old_path_length:
-        return old_path
+        pos1 = Point2(edge[0].x, edge[0].y)
+        pos2 = Point2(edge[1].x, edge[1].y)
+
+        edge_line = Segment(pos1, pos2)
+
+        distance = edge_line.distance(end_point)
+
+        if distance < closest_distance:
+            closest_edge = edge
+            closest_distance = distance
+
+    graph.add_node(end_node)
+
+    if closest_distance < 20:
+        node1, node2 = closest_edge
+        graph.remove_edge(node1, node2)
+        graph.add_edge(node1, end_node, weight=find_edge_weight(node1, end_node))
+        graph.add_edge(node2, end_node, weight=find_edge_weight(node2, end_node))
     else:
-        return new_path
-
-# Find the closest node to chosen destination
-def find_closest_node(end_node: Point, node_list: List[Point]) -> Point:
-    closest_node: Point = Point(10000,10000, RoadSegmentType.STRAIGHT)
-    for node in node_list:
-        if find_edge_weight(end_node, node) < find_edge_weight(end_node, closest_node):
-            closest_node = node
-
-    # get neighbours of closest_node and compare the distance from end_node to edges of neighbour nodes
-    # edge closest to end_node will be node
-    segments = []
-    for neighbour_node in NH_G.adj(closest_node):
-        segments.append(Segment(closest_node, neighbour_node).di)
-
-
-    return closest_node
+        closest_node: Point = Point(10000, 10000, RoadSegmentType.STRAIGHT)
+        for node in node_list:
+            if find_edge_weight(end_node, node) < find_edge_weight(end_node, closest_node):
+                closest_node = node
+        graph.add_edge(end_node, closest_node, weight=find_edge_weight(end_node, closest_node))
 
 # create path from clicking on canvas
 def handle_canvas_m1(event):
-    global map_model, current_image
+    global map_model, current_image, dest_node
     x, y = event.x, event.y
 
     #delete line and path if already created
     canvas.delete("line")
-    if not(map_model.empty()):
+    if not map_model.empty():
         map_model.delete_path(0)
 
+    #delete destination node from graph when creating new path
+    if not dest_node.x is None:
+        if current_image == NH and NH_G.has_node(dest_node):
+            neighbor_nodes = list(NH_G.neighbors(dest_node))
+            NH_G.remove_node(dest_node)
+            if len(neighbor_nodes) > 1:
+                node1, node2 = neighbor_nodes
+                NH_G.add_edge(node1, node2, weight=find_edge_weight(node1, node2))
+        elif current_image == CITY and C_G.has_node(dest_node):
+            neighbor_nodes = list(C_G.neighbors(dest_node))
+            C_G.remove_node(dest_node)
+            if len(neighbor_nodes) > 1:
+                node1, node2 = neighbor_nodes
+                C_G.add_edge(node1, node2, weight=find_edge_weight(node1, node2))
+
     #adding chosen node to graph
-    end_point: Point = Point(x, y, RoadSegmentType.STRAIGHT)
+    dest_node = Point(x, y, RoadSegmentType.STRAIGHT)
     path = []
 
-    if current_image == CITY:
-        closest_point: Point = find_closest_node(end_point, C_pointList)
-        C_G.add_edge(end_point, closest_point, weight=find_edge_weight(end_point, closest_point))
-        path = find_shortest_path(C_G, C_startpoint, end_point)
-    elif current_image == NH:
-        closest_point: Point = find_closest_node(end_point, NH_pointList)
-        NH_G.add_edge(end_point, closest_point, weight=find_edge_weight(end_point, closest_point))
-        path = find_shortest_path(NH_G, NH_startpoint, end_point)
-
-    # optimized_path = optimize_shortest_path(path)
+    if current_image == NH:
+        add_dest_node(NH_G, dest_node, NH_pointList)
+        path = find_shortest_path(NH_G, NH_startpoint, dest_node)
+    elif current_image == CITY:
+        add_dest_node(C_G, dest_node, C_pointList)
+        path = find_shortest_path(C_G, C_startpoint, dest_node)
 
     #create line on canvas showing generated path
     draw_line(path)
