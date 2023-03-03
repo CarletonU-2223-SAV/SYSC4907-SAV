@@ -321,6 +321,31 @@ def add_dest_node(graph: nx.Graph(), end_node: Point, node_list: List[Point]):
                 closest_node = node
         graph.add_edge(end_node, closest_node, weight=find_edge_weight(end_node, closest_node))
 
+# optimize path by adding more points on straight roads and a curved path at intersections
+def optimize_path(path: List[Point]) -> List[Point]:
+    new_path = []
+    for i in range(len(path)-1):
+        start_point = path[i]
+        end_point = path[i+1]
+        interval = 25
+        distance = find_edge_weight(start_point, end_point)
+        num_points = int(distance / interval)
+
+        points = []
+        for j in range(num_points):
+            x = start_point.x + j * interval * (end_point.x - start_point.x) / distance
+            y = start_point.y + j * interval * (end_point.y - start_point.y) / distance
+            points.append(Point(x, y, RoadSegmentType.STRAIGHT))
+        points.append(end_point)
+        new_path.append(points)
+
+    print(new_path)
+    merged_list = []
+    for sublist in new_path:
+        merged_list.extend(sublist)
+
+    return merged_list
+
 # create path from clicking on canvas
 def handle_canvas_m1(event):
     global map_model, current_image, dest_node
@@ -348,8 +373,7 @@ def handle_canvas_m1(event):
 
     #adding chosen node to graph
     dest_node = Point(x, y, RoadSegmentType.STRAIGHT)
-    path = []
-
+    path: List[Point] = []
     if current_image == NH:
         add_dest_node(NH_G, dest_node, NH_pointList)
         path = find_shortest_path(NH_G, NH_startpoint, dest_node)
@@ -358,19 +382,24 @@ def handle_canvas_m1(event):
         path = find_shortest_path(C_G, C_startpoint, dest_node)
 
     #create line on canvas showing generated path
-    draw_line(path)
+    better_path = optimize_path(path)
+    draw_line(better_path)
+    print(path)
 
     #add path to map_model for navigation
     lane: Lane = Lane()
-    lane.set_lane(path)
+    lane.set_lane(better_path)
     map_model.add_path(lane)
 
 # draws path onto canvas
-def draw_line(path: List):
-    canvas.delete("line")
+def draw_line(path: List[Point]):
+    canvas.delete("line", "dot")
+    size = 3
     for i in range(len(path)):
         if i < len(path) - 1:
             canvas.create_line(path[i].x, path[i].y, path[i + 1].x, path[i + 1].y, fill="red", width=3, tags="line")
+        canvas.create_oval(path[i].x - size, path[i].y - size, path[i].x + size, path[i].y + size, fill='red',
+                           outline='yellow', tags="dot")
 
 # Handle load from file
 def handle_load():

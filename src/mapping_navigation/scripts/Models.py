@@ -34,7 +34,7 @@ class Point:
         return c2
 
     def __str__(self):
-        return f'{(self.x, self.y)}'
+        return f'{(self.x, self.y, self.seg_type)}'
 
     def __repr__(self):
         return self.__str__()
