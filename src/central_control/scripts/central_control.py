@@ -102,7 +102,7 @@ LEFT_TURN_ANGLE = -0.8
 RIGHT_TURN_ANGLE = 0.8
 MAX_TURN_ANGLE = 1.0
 
-STOPPED_SPEED = 0.001
+STOPPED_SPEED = 0
 HOLD_BRAKE = 1
 RELEASE_BRAKE = 0
 STOP_THROTTLE = 0
@@ -198,6 +198,7 @@ class CentralControl:
                         self.car_controls.throttle = STOP_THROTTLE
                         self.car_controls.brake = HOLD_BRAKE
                         #self.bridge.set_controls(self.car_controls)
+                        print("A")
                     elif sign.depth <= LOOKAHEAD_DEPTH:
                         self.cc_state.add(CCState.STREET_RULE)
                         self.stop_state = StopState.DETECTED
@@ -464,7 +465,7 @@ class CentralControl:
         self.sign_data.clear()
         detection_list: List[DetectionResult] = res.detection_results
         for detection in detection_list:
-            if detection.class_num == 11 and detection.depth < 40 and detection.confidence > 0.4:
+            if detection.class_num == 11 and detection.depth < 50 and detection.confidence > 0.2:
                 # Stop sign. Depth is likely going to be smaller than 25 because of the image resolution
                 self.sign_data.append(detection)
 

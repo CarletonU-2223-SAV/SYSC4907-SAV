@@ -2,6 +2,8 @@
 import cv2
 import numpy as np
 import rospy
+import torch
+import pandas as pd
 from sensors.msg import SceneDepth
 from sign_car_recognition.msg import DetectionResults, DetectionResult
 from typing import List, Tuple
@@ -29,7 +31,10 @@ NAME = 6
 
 class StopSignDetector:
     def __init__(self):
-        self.stop_cascade = cv2.CascadeClassifier('stop_sign.xml')
+        path = Path(__file__).parent
+        self.stop_cascade = cv2.CascadeClassifier(str(path/'stop_sign.xml'))
+        self.model = torch.hub.load('ultralytics/yolov5', 'yolov5s')
+        self.model.eval()
         self.pub = rospy.Publisher("stop_sign_detection", DetectionResults, queue_size=1)
         rospy.init_node('new_stop_sign_detector', anonymous=True)
 
@@ -40,6 +45,7 @@ class StopSignDetector:
     def handle_image(self, combine: SceneDepth):
         #img_rgb = np.frombuffer(combine.scene.data, dtype=np.uint8).reshape(combine.scene.height, combine.scene.width,3)
         img1d = np.frombuffer(combine.scene.data, dtype=np.uint8)
+        #img_imcode = cv2.imdecode(img1d, cv2.IMREAD_COLOR)
         img_rgb = img1d.reshape(combine.scene.height, combine.scene.width, 3)
         res: List[DetectionResult] = self.detect_objects(img_rgb)
 
@@ -88,7 +94,6 @@ class StopSignDetector:
         stops = stop_cascade.detectMultiScale(gray_img, scaleFactor=1.0095, minNeighbors=10, minSize=(20, 20))
         # res_list = results.pandas().xyxy[0].to_numpy().tolist()
         res_list = []
-
         detect_results = []
         # important detection classes we care about
         imp_classes = {
@@ -121,6 +126,7 @@ class StopSignDetector:
             detect_results.append(dr)
 
         return detect_results
+
 
 if __name__ == "__main__":
     stop_sign_detect = StopSignDetector()
