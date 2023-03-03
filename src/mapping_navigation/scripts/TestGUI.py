@@ -295,27 +295,20 @@ def find_shortest_path(graph: nx.Graph(), start_node: Point, end_node: Point) ->
 
 # Add destination node to graph
 def add_dest_node(graph: nx.Graph(), end_node: Point, node_list: List[Point]):
-
     closest_edge = None
     closest_distance = 100000
-
     end_point = Point2(end_node.x, end_node.y)
 
     for edge in graph.edges():
-
         pos1 = Point2(edge[0].x, edge[0].y)
         pos2 = Point2(edge[1].x, edge[1].y)
-
         edge_line = Segment(pos1, pos2)
-
         distance = edge_line.distance(end_point)
-
         if distance < closest_distance:
             closest_edge = edge
             closest_distance = distance
 
     graph.add_node(end_node)
-
     if closest_distance < 20:
         node1, node2 = closest_edge
         graph.remove_edge(node1, node2)
@@ -445,8 +438,8 @@ window.title("Map creator")
 init_menu_bar()
 
 # Canvas
-img = [ImageTk.PhotoImage(Image.open('AirSim_graphs/City_Graph.png')),
-       ImageTk.PhotoImage(Image.open('AirSim_graphs/NH_Graph.png'))]
+img = [ImageTk.PhotoImage(Image.open('AirSim_maps/City_Top.png')),
+       ImageTk.PhotoImage(Image.open('AirSim_maps/NH_Top.png'))]
 h = img[0].height()
 w = img[0].width()
 
