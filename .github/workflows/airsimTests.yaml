@@ -24,6 +24,6 @@ jobs:
       - name: Run the test path
         run: |
           source /opt/ros/noetic/setup.bash
-          ./run_airsim_image_binary.sh sav AirSimNH/LinuxNoEditor/AirSimNH.sh -- headless
+          sudo ./run_airsim_image_binary.sh sav AirSimNH/LinuxNoEditor/AirSimNH.sh -- headless
           catkin_make
           roslaunch central_control full_system.launch logging:=true
