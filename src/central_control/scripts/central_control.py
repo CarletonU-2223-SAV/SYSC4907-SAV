@@ -170,6 +170,7 @@ class CentralControl:
         # rospy.Subscriber("new_lidar_data", Float64MultiArray, self.handle_lidar_detection)
         rospy.Subscriber("stop_sign_detection", DetectionResults, self.handle_stop_sign)
 
+
         # Midpoint of the image width
         MID_X = IMAGE_WIDTH / 2
 
@@ -444,6 +445,17 @@ class CentralControl:
             if detection.class_num == 2 and detection.confidence > 0.4:
                 # Only deal with cars for now
                 self.object_data.append(detection)
+
+    def handle_stop_sign(self, res: DetectionResults):
+        if not self.ready:
+            self.ready = True
+        # Sort through and deal with sign detection
+        self.sign_data.clear()
+        detection_list: List[DetectionResult] = res.detection_results
+        for detection in detection_list:
+            if detection.class_num == 11 and detection.depth < 40 and detection.confidence > 0.4:
+                # Stop sign. Depth is likely going to be smaller than 25 because of the image resolution
+                self.sign_data.append(detection)
 
     def handle_stop_sign(self, res: DetectionResults):
         if not self.ready:

@@ -110,7 +110,7 @@ class SignDetector:
             2: 'car',
             3: 'motorcycle',
             7: 'truck',
-            9: 'traffic light',
+            9: 'traffic light'
         }
         for elem in res_list:
             # Skip adding the result if not a relevant class

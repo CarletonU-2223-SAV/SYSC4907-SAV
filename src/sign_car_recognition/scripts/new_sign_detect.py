@@ -2,8 +2,6 @@
 import cv2
 import numpy as np
 import rospy
-import torch
-import pandas as pd
 from sensors.msg import SceneDepth
 from sign_car_recognition.msg import DetectionResults, DetectionResult
 from typing import List, Tuple
@@ -31,8 +29,7 @@ NAME = 6
 
 class StopSignDetector:
     def __init__(self):
-        # self.model = torch.hub.load('ultralytics/yolov5', 'yolov5s')
-        # self.model.eval()
+        self.stop_cascade = cv2.CascadeClassifier('stop_sign.xml')
         self.pub = rospy.Publisher("stop_sign_detection", DetectionResults, queue_size=1)
         rospy.init_node('new_stop_sign_detector', anonymous=True)
 
@@ -41,8 +38,9 @@ class StopSignDetector:
         rospy.spin()
 
     def handle_image(self, combine: SceneDepth):
-        img_rgb = np.frombuffer(combine.scene.data, dtype=np.uint8).reshape(combine.scene.height, combine.scene.width,
-                                                                            3)
+        #img_rgb = np.frombuffer(combine.scene.data, dtype=np.uint8).reshape(combine.scene.height, combine.scene.width,3)
+        img1d = np.frombuffer(combine.scene.data, dtype=np.uint8)
+        img_rgb = img1d.reshape(combine.scene.height, combine.scene.width, 3)
         res: List[DetectionResult] = self.detect_objects(img_rgb)
 
         # Match with scene depth
@@ -72,6 +70,7 @@ class StopSignDetector:
             cv2.rectangle(img_rgb, (detect.xmin, detect.ymin), (detect.xmin + detect.xmax, detect.ymin + detect.ymax),
                           (0, 0, 255), 2)
 
+
         cv2.imshow('Stop Signs', img_rgb)
         cv2.waitKey(1)
 
@@ -95,11 +94,13 @@ class StopSignDetector:
         imp_classes = {
             11: 'stop sign'
         }
+
         confidence = 0.7
         for i, stop_coords in enumerate(stops):
             x, y, w, h = stop_coords
             res_tuple = (x, y, w, h, confidence, 11, 'stop sign')
             res_list.append(res_tuple)
+
         for elem in res_list:
             # Skip adding the result if not a relevant class
             if elem[CLASS_NUM] not in imp_classes:
@@ -116,10 +117,10 @@ class StopSignDetector:
             file = open('DetectionResult.txt', 'w')
             file.write(str(dr))
             file.close()
+
             detect_results.append(dr)
 
         return detect_results
-
 
 if __name__ == "__main__":
     stop_sign_detect = StopSignDetector()
