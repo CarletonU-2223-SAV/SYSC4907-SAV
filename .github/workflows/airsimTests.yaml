@@ -13,16 +13,14 @@ jobs:
         uses: actions/checkout@v3
       - name: Install ROS Noetic
         run: |
-          sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
+          sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
           curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
-          apt update
-          apt install ros-noetic-ros-base  python3-rosdep python3-rosinstall python3-rosinstall-generator python3-wstool build-essential
+          sudo apt update
+          sudo apt install ros-noetic-ros-base  python3-rosdep python3-rosinstall python3-rosinstall-generator python3-wstool build-essential
       - name: Download AirSim
         run: |
           wget https://github.com/microsoft/AirSim/releases/download/v1.8.1/AirSimNH.zip -q -O AirSimNH.zip
           unzip AirSimNH.zip
-      - name: Build Docker Container for ROS
-        run: docker build -t sav .
       - name: Run the test path
         run: |
           source /opt/ros/noetic/setup.bash
