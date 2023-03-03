@@ -21,9 +21,12 @@ jobs:
         run: |
           wget https://github.com/microsoft/AirSim/releases/download/v1.8.1/AirSimNH.zip -q -O AirSimNH.zip
           unzip AirSimNH.zip
+      - name: Run AirSim in a Docker container
+        run: |
+          sudo docker pull ubuntu
+          sudo sh run_airsim_image_binary.sh ubuntu AirSimNH/LinuxNoEditor/AirSimNH.sh -- headless
       - name: Run the test path
         run: |
           source /opt/ros/noetic/setup.bash
-          sudo sh run_airsim_image_binary.sh sav AirSimNH/LinuxNoEditor/AirSimNH.sh -- headless
           catkin_make
           roslaunch central_control full_system.launch logging:=true
