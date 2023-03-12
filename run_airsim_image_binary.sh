@@ -47,7 +47,7 @@ done
 # now, let's mount the user directory which points to the unreal binary (UNREAL_BINARY_PATH)
 # set the environment varible SDL_VIDEODRIVER to SDL_VIDEODRIVER_VALUE
 # and tell the docker container to execute UNREAL_BINARY_COMMAND
-$DOCKER_CMD -it \
+$DOCKER_CMD \
     -v $(pwd)/settings.json:/home/airsim_user/Documents/AirSim/settings.json \
     -v $UNREAL_BINARY_PATH:$UNREAL_BINARY_PATH \
     -e SDL_VIDEODRIVER=$SDL_VIDEODRIVER_VALUE \
