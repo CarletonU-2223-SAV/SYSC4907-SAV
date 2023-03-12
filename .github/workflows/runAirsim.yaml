@@ -17,5 +17,5 @@ jobs:
           unzip AirSimNH.zip
       - name: Run AirSim in a Docker container
         run: |
-          sudo docker pull nvidia/cudagl:10.0-devel-ubuntu18.04
-          sudo sh run_airsim_image_binary.sh nvidia/cudagl:10.0-devel-ubuntu18.04 AirSimNH/LinuxNoEditor/AirSimNH.sh -- headless
+          sudo docker pull ubuntu
+          sudo sh run_airsim_image_binary.sh ubuntu AirSimNH/LinuxNoEditor/AirSimNH.sh -- headless
