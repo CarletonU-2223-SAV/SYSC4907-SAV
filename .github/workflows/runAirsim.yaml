@@ -1,0 +1,21 @@
+name: AirSim Integration Tests
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Download AirSim
+        run: |
+          wget https://github.com/microsoft/AirSim/releases/download/v1.8.1/AirSimNH.zip -q -O AirSimNH.zip
+          unzip AirSimNH.zip
+      - name: Run AirSim in a Docker container
+        run: |
+          sudo docker pull nvidia/cudagl:10.0-devel-ubuntu18.04
+          sudo sh run_airsim_image_binary.sh nvidia/cudagl:10.0-devel-ubuntu18.04 AirSimNH/LinuxNoEditor/AirSimNH.sh -- headless
