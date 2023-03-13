@@ -11,21 +11,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-      - name: Set up Python 3.8
-        uses: actions/setup-python@v4
         with:
-          python-version: "3.8"
-      - name: Set up Pythonpath
+          fetch-depth: 2
+      - name: Require new logs
         run: |
-          echo "PYTHONPATH=${PYTHONPATH}:${GITHUB_WORKSPACE}/src/central_control/scripts:${GITHUB_WORKSPACE}/src/cruise_control/scripts:${GITHUB_WORKSPACE}/src/lane_keep_assist/scripts:${GITHUB_WORKSPACE}/src/lidar_object_recognition/scripts:${GITHUB_WORKSPACE}/src/mapping_navigation/scripts:${GITHUB_WORKSPACE}/src/sensors/scripts:${GITHUB_WORKSPACE}/src/sign_car_recognition/scripts" >> $GITHUB_ENV
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install Pillow sympy
-      - name: Run metrics on base test
-        run: |
-          python testing/AirSimTests/log_analyzer.py NH_auto_path_coords --pr-branch=${{ github.event.pull_request.head.ref }},${{ github.event.pull_request.head.sha }}
-      - name: Comment metrics if PR
-        uses: thollander/actions-comment-pull-request@v2
-        with:
-          filePath: pr_message.txt
+          git diff --name-only -r HEAD^1 HEAD | if [[ $1 == *"testing/AirSimTests/log/NH_auto_path_coords.txt"* ]]; then
+            exit 1
+          fi
