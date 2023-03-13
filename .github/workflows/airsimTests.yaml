@@ -15,6 +15,7 @@ jobs:
           fetch-depth: 2
       - name: Require new logs
         run: |
+          git diff --name-only -r HEAD^1 HEAD
           git diff --name-only -r HEAD^1 HEAD | if [[ $1 == *"testing/AirSimTests/log/NH_auto_path_coords.txt"* ]]; then
             exit 1
           fi
