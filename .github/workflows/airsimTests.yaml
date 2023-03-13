@@ -19,7 +19,8 @@ jobs:
       - name: Require new logs
         run: |
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
-            if [$file = "testing/AirSimTests/log/NH_auto_path_coords.txt"] then
+            if [$file = "testing/AirSimTests/log/NH_auto_path_coords.txt"]
+            then
               exit 0
             else
               echo $file
