@@ -5,6 +5,7 @@ from typing import List
 
 import networkx as nx
 import MapSerializer as MS
+import numpy as np
 from PIL import ImageTk, Image
 from Models import RoadSegmentType, MapModel, Lane, Point
 from sympy import Point as Point2, Segment
@@ -321,30 +322,75 @@ def add_dest_node(graph: nx.Graph(), end_node: Point, node_list: List[Point]):
                 closest_node = node
         graph.add_edge(end_node, closest_node, weight=find_edge_weight(end_node, closest_node))
 
+
+# creates points along a straight path
+def straight_path_points(start_point: Point, end_point: Point, interval: int) -> List:
+    distance = find_edge_weight(start_point, end_point)
+    num_points_straight = int(distance / interval)
+
+    # create points along straight road
+    points_straight = []
+    for j in range(1, num_points_straight):
+        x = start_point.x + j * interval * (end_point.x - start_point.x) / distance
+        y = start_point.y + j * interval * (end_point.y - start_point.y) / distance
+        points_straight.append(Point(x, y, RoadSegmentType.STRAIGHT))
+    return points_straight
+
 # optimize path by adding more points on straight roads and a curved path at intersections
 def optimize_path(path: List[Point]) -> List[Point]:
-    new_path = []
-    for i in range(len(path)-1):
+    interval = 25
+
+    new_path = [[path[0]]]
+
+    for i in range(len(path) - 2):
         start_point = path[i]
-        end_point = path[i+1]
-        interval = 25
-        distance = find_edge_weight(start_point, end_point)
-        num_points = int(distance / interval)
+        end_point = path[i + 1]
+        next_point = path[i + 2]
 
-        points = []
-        for j in range(num_points):
-            x = start_point.x + j * interval * (end_point.x - start_point.x) / distance
-            y = start_point.y + j * interval * (end_point.y - start_point.y) / distance
-            points.append(Point(x, y, RoadSegmentType.STRAIGHT))
-        points.append(end_point)
-        new_path.append(points)
+        points_straight = straight_path_points(start_point, end_point, interval)
 
-    print(new_path)
+        new_path.append(points_straight)
+
+        # create points along intersection
+        if len(path) > 2 and i < (len(path) - 2):
+            points_curve = []
+
+            if not (start_point.x == end_point.x and end_point.x == next_point.x) or not (start_point.y == end_point.y and end_point.y == next_point.y):
+                num_points_curve = 5
+                radius = 33
+                start_point = points_straight[-1]
+                end_x = end_point.x + 1 * interval * (next_point.x - end_point.x) / find_edge_weight(next_point, end_point)
+                end_y = end_point.y + 1 * interval * (next_point.y - end_point.y) / find_edge_weight(next_point, end_point)
+                # Calculate control point
+                dx = end_x - start_point.x
+                dy = end_y - start_point.y
+                theta = math.atan2(dy, dx)
+                x_offset = radius * math.sin(theta)
+                y_offset = radius * math.cos(theta)
+                control_point = (end_x - x_offset, end_y + y_offset)
+
+                # Generate Bezier curve
+                for j in range(num_points_curve):
+                    t = j / (num_points_curve - 1)
+                    x = (1 - t) ** 2 * start_point.x + 2 * (1 - t) * t * control_point[0] + t ** 2 * end_x
+                    y = (1 - t) ** 2 * start_point.y + 2 * (1 - t) * t * control_point[1] + t ** 2 * end_y
+                    points_curve.append(Point(x, y, RoadSegmentType.INTERSECTION))
+            else:
+                points_curve = straight_path_points(end_point, next_point)
+
+            new_path.append(points_curve)
+
+    points_straight = straight_path_points(path[-2], path[-1], interval)
+    new_path.append(points_straight)
+
+    new_path.append([path[-1]])
+
     merged_list = []
     for sublist in new_path:
         merged_list.extend(sublist)
 
     return merged_list
+
 
 # create path from clicking on canvas
 def handle_canvas_m1(event):
@@ -377,18 +423,18 @@ def handle_canvas_m1(event):
     if current_image == NH:
         add_dest_node(NH_G, dest_node, NH_pointList)
         path = find_shortest_path(NH_G, NH_startpoint, dest_node)
+        print(path)
+        path = optimize_path(path)
     elif current_image == CITY:
         add_dest_node(C_G, dest_node, C_pointList)
         path = find_shortest_path(C_G, C_startpoint, dest_node)
 
     #create line on canvas showing generated path
-    better_path = optimize_path(path)
-    draw_line(better_path)
-    print(path)
+    draw_line(path)
 
     #add path to map_model for navigation
     lane: Lane = Lane()
-    lane.set_lane(better_path)
+    lane.set_lane(path)
     map_model.add_path(lane)
 
 # draws path onto canvas
