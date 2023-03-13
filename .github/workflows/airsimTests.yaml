@@ -19,5 +19,5 @@ jobs:
         with:
           files: testing/AirSimTests/log/NH_auto_path_coords.txt
       - name: Require new logs
-        if: steps.changed-files.outputs.any_changed == 'true'
+        if: steps.changed-files.outputs.any_changed == 'false'
         run: exit 1
