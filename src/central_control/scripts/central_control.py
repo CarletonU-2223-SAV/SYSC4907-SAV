@@ -311,6 +311,7 @@ class CentralControl:
         self.bridge.set_controls(self.car_controls)
         while self.speed != 0:
             rate.sleep()
+        rospy.signal_shutdown("Path complete")
 
     def handle_lane_data(self, lane_data: LaneStatus):
         """
