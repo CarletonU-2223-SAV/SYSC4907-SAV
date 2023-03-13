@@ -16,14 +16,8 @@ jobs:
       - name: Get changed files
         id: changed-files
         uses: tj-actions/changed-files@v35
+        with:
+          files: testing/AirSimTests/log/NH_auto_path_coords.txt
       - name: Require new logs
-        run: |
-          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
-            if [$file = "testing/AirSimTests/log/NH_auto_path_coords.txt"]
-            then
-              exit 0
-            else
-              echo $file
-            fi
-          done
-          exit 1
+        if: steps.changed-files.outputs.any_changed == 'true'
+        run: exit 1
