@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from enum import Enum
-from typing import List, Dict, Tuple
+from typing import List, Tuple
 
 X_COORD = 0
 Y_COORD = 1
@@ -39,22 +39,6 @@ class Point:
     def __repr__(self):
         return self.__str__()
 
-
-# Model a connection between two points
-class Connection:
-    def __init__(self, from_seg_id: int, from_point: Point, to_seg_id: int = None, to_point: Point = None):
-        self.from_seg_id: int = from_seg_id
-        self.to_seg_id: int = to_seg_id
-        self.from_point: Point = from_point
-        self.to_point: Point = to_point
-
-    def __str__(self):
-        return f'{self.from_point}->{self.to_point}, seg_id: {self.from_seg_id}->{self.to_seg_id}'
-
-    def __repr__(self):
-        return self.__str__()
-
-
 class Lane:
     def __init__(self, points: List[Point] = None):
         self.points: List[Point] = points
@@ -82,64 +66,6 @@ class Lane:
         out = [(point.x, point.y) for point in self.points]
         return out
 
-class RoadSegment:
-    def __init__(self, segment_id: int, seg_type: RoadSegmentType, lanes: List[Lane] = None):
-        self.segment_id: int = segment_id
-        self.seg_type: RoadSegmentType = seg_type
-        self.lanes: List[Lane] = lanes
-
-    def __str__(self):
-        s = f'{self.seg_type}:'
-        for lane in self.lanes:
-            s = f'{s}\n{lane}'
-        return s
-
-    def __repr__(self):
-        return self.__str__()
-
-    def add_lane(self):
-        self.lanes.append(Lane([]))
-
-    def add_point(self, lane_id: int, point: Point):
-        self.lanes[lane_id].add_point(point)
-
-    # Delegate removal to the right Lane
-    def remove_point(self, lane_id: int, point_id: int):
-        self.lanes[lane_id].remove_point(point_id)
-
-
-# Linear, deterministic path. Nothing dynamic.
-class Path:
-    def __init__(self):
-        # First point has the Connection as None
-        self.connections: List[Tuple[Connection, Point]] = []
-
-    def __str__(self):
-        if not self.connections:
-            return 'empty path'
-        else:
-            s = ''
-            for index, connection in enumerate(self.connections):
-                s = f'{s}\n{index}) {connection[0]}'
-            return s
-
-    def __repr__(self):
-        return self.__str__()
-
-    # TODO: path validation?
-    def add_to_path(self, connection: Connection, to_point: Point):
-        self.connections.append((connection, to_point))
-
-    def remove_last_point(self):
-        if len(self.connections) > 0:
-            del self.connections[-1]
-        else:
-            print('nothing to remove')
-
-    def empty(self):
-        return not self.connections
-
-
 class MapModel:
     # Semantic versioning: Major.Minor.Patch
     version: str = '0.1.0'
@@ -147,18 +73,8 @@ class MapModel:
     AirSim_correction_factor: List[List[int]] = [[-645, -573], [-614, -589]]  # Start points of vehicles in environments
 
     def __init__(self):
-        self.curr_id: int = 0
-        # <segment id, segment>
-        self.road_segments: Dict[int, RoadSegment] = {}
-        # <segment id, connections[]>
-        self.connections: Dict[int, List[Connection]] = {}
         self.paths: List[Lane] = []
         self.instance_version: str = '0.1.0'
-
-    def add_road_segment(self, seg_type: RoadSegmentType) -> int:
-        self.road_segments[self.curr_id] = RoadSegment(self.curr_id, seg_type, [])
-        self.curr_id += 1
-        return self.curr_id - 1
 
     # Add new path to model
     def add_path(self, new_path: Lane):

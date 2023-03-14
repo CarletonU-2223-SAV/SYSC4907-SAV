@@ -198,9 +198,9 @@ C_edges = [
     (C_point67,	C_point68, {"weight": find_edge_weight(C_point67, C_point68)}),
     (C_point68,	C_point69, {"weight": find_edge_weight(C_point68, C_point69)}),
     (C_point69,	C_point70, {"weight": find_edge_weight(C_point69, C_point70)}),
-    (C_point70,	C_point71, {"weight": find_edge_weight(C_point70,	C_point71)}),
-    (C_point71,	C_point72, {"weight": find_edge_weight(C_point71,	C_point72)}),
-    (C_point72,	C_point73, {"weight": find_edge_weight(C_point72,	C_point73)})
+    (C_point70,	C_point71, {"weight": find_edge_weight(C_point70, C_point71)}),
+    (C_point71,	C_point72, {"weight": find_edge_weight(C_point71, C_point72)}),
+    (C_point72,	C_point73, {"weight": find_edge_weight(C_point72, C_point73)})
 ]
 
 NH_G.add_edges_from(NH_edges)
