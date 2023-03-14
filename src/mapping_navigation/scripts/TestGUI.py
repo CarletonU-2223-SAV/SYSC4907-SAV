@@ -5,10 +5,13 @@ from typing import List, Tuple
 
 import networkx as nx
 import MapSerializer as MS
-import numpy as np
 from PIL import ImageTk, Image
 from Models import RoadSegmentType, MapModel, Lane, Point
 from sympy import Point as Point2, Segment
+
+# can optimize these metrics to inc/dec points placed among path
+STRAIGHT_INTERVAL = 30
+CURVE_POINTS = 8
 
 CITY = 1
 NH = 2
@@ -324,17 +327,15 @@ def add_dest_node(graph: nx.Graph(), end_node: Point, node_list: List[Point]):
 
 
 def straight_point_formula(start: Point, end: Point, i: int) -> Tuple[float, float]:
-    interval = 35
     distance = find_edge_weight(start, end)
-    x = start.x + i * interval * (end.x - start.x) / distance
-    y = start.y + i * interval * (end.y - start.y) / distance
+    x = start.x + i * STRAIGHT_INTERVAL * (end.x - start.x) / distance
+    y = start.y + i * STRAIGHT_INTERVAL * (end.y - start.y) / distance
     return x, y
 
 # creates points along a straight path
 def generate_straight_points(start_point: Point, end_point: Point) -> List:
-    interval = 35
     distance = find_edge_weight(start_point, end_point)
-    num_points_straight = int(distance / interval)
+    num_points_straight = int(distance / STRAIGHT_INTERVAL)
 
     # create points along straight road
     points_straight = []
@@ -344,10 +345,10 @@ def generate_straight_points(start_point: Point, end_point: Point) -> List:
     return points_straight
 
 # creates points along an intersection
-def generate_curve(start_point: Point, mid_point: Point, end_point: Point, num_points: int) -> List[Point]:
+def generate_curve(start_point: Point, mid_point: Point, end_point: Point) -> List[Point]:
     points = []
-    for i in range(num_points):
-        t = i / (num_points - 1)
+    for i in range(CURVE_POINTS):
+        t = i / (CURVE_POINTS - 1)
         p = quadratic_bezier(t, start_point, mid_point, end_point)
         points.append(p)
     return points
@@ -373,11 +374,10 @@ def optimize_path(path: List[Point]) -> List[Point]:
 
         # create points along intersection
         if len(path) > 2 and i < (len(path) - 2):
-            num_points_curve = 8
             start_of_inter = straight_points[-1]
             end_x, end_y = straight_point_formula(second_point, third_point, 1)
             end_of_inter = Point(end_x, end_y, RoadSegmentType.STRAIGHT)
-            curve_points = generate_curve(start_of_inter, second_point, end_of_inter, num_points_curve)
+            curve_points = generate_curve(start_of_inter, second_point, end_of_inter)
             new_path.extend(curve_points)
 
     straight_points = generate_straight_points(second_last_end_point, end_point)
