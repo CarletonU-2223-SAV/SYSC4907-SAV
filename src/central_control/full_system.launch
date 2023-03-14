@@ -16,8 +16,8 @@
 <!--   <node name="car_detect" pkg="sign_car_recognition" type="car_detect.py" /> -->
   <node name="sign_detect" pkg="sign_car_recognition" type="sign_detect.py" />
   <node name="new_stop_sign_detect" pkg="sign_car_recognition" type="new_sign_detect.py" />
-  <!-- name="object_detect" pkg="lidar_object_recognition" type="lidar_object_detect.py" /> -->
-  <node name="new_object_detect" pkg="lidar_object_recognition_2" type="new_lidar_object_detect.py"/>
+  <node name="object_detect" pkg="lidar_object_recognition" type="lidar_object_detect.py" />
+  <!-- node name="new_object_detect" pkg="lidar_object_recognition_2" type="new_lidar_object_detect.py"/> -->
 
   <node name="cruise_control" pkg="cruise_control" type="cruise_control.py" />
   <node name="speedometer" pkg="sensors" type="speedometer.py" />
