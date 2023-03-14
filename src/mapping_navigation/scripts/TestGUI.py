@@ -324,7 +324,7 @@ def add_dest_node(graph: nx.Graph(), end_node: Point, node_list: List[Point]):
 
 
 def straight_point_formula(start: Point, end: Point, i: int) -> Tuple[float, float]:
-    interval = 10
+    interval = 35
     distance = find_edge_weight(start, end)
     x = start.x + i * interval * (end.x - start.x) / distance
     y = start.y + i * interval * (end.y - start.y) / distance
@@ -332,7 +332,7 @@ def straight_point_formula(start: Point, end: Point, i: int) -> Tuple[float, flo
 
 # creates points along a straight path
 def generate_straight_points(start_point: Point, end_point: Point) -> List:
-    interval = 10
+    interval = 35
     distance = find_edge_weight(start_point, end_point)
     num_points_straight = int(distance / interval)
 
@@ -373,7 +373,7 @@ def optimize_path(path: List[Point]) -> List[Point]:
 
         # create points along intersection
         if len(path) > 2 and i < (len(path) - 2):
-            num_points_curve = 10
+            num_points_curve = 8
             start_of_inter = straight_points[-1]
             end_x, end_y = straight_point_formula(second_point, third_point, 1)
             end_of_inter = Point(end_x, end_y, RoadSegmentType.STRAIGHT)
