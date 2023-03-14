@@ -334,10 +334,10 @@ def add_dest_node(graph: nx.Graph(), end_node: Point) -> bool:
         return False
 
 
-def straight_point_formula(start: Point, end: Point, i: int) -> Tuple[float, float]:
-    distance = find_edge_weight(start, end)
-    x = start.x + i * STRAIGHT_INTERVAL * (end.x - start.x) / distance
-    y = start.y + i * STRAIGHT_INTERVAL * (end.y - start.y) / distance
+def straight_point_formula(start_point: Point, end_point: Point, i: int) -> Tuple[float, float]:
+    distance = find_edge_weight(start_point, end_point)
+    x = start_point.x + i * STRAIGHT_INTERVAL * (end_point.x - start_point.x) / distance
+    y = start_point.y + i * STRAIGHT_INTERVAL * (end_point.y - start_point.y) / distance
     return x, y
 
 # creates points along a straight path
@@ -373,19 +373,20 @@ def optimize_path(path: List[Point]) -> List[Point]:
     second_last_end_point = path[-2]
     new_path = [start_point]
 
-    for i in range(len(path) - 2):
-        first_point = path[i]
-        second_point = path[i + 1]
-        third_point = path[i + 2]
-        straight_points = generate_straight_points(first_point, second_point)
+    for i, _ in enumerate(path[:-2]):
+        p0 = path[i]
+        p1 = path[i + 1]
+        p2 = path[i + 2]
+        straight_points = generate_straight_points(p0, p1)
         new_path.extend(straight_points)
 
         # create points along intersection
-        if len(path) > 2 and i < (len(path) - 2):
-            start_of_inter = straight_points[-1]
-            end_x, end_y = straight_point_formula(second_point, third_point, 1)
-            end_of_inter = Point(end_x, end_y, RoadSegmentType.STRAIGHT)
-            curve_points = generate_curve(start_of_inter, second_point, end_of_inter)
+        if len(path) > 2:
+            i0 = straight_points[-1]
+            i1 = p1
+            i2_x, i2_y = straight_point_formula(p1, p2, 1)
+            i2 = Point(i2_x, i2_y, RoadSegmentType.STRAIGHT)
+            curve_points = generate_curve(i0, i1, i2)
             new_path.extend(curve_points)
 
     straight_points = generate_straight_points(second_last_end_point, end_point)
@@ -513,6 +514,7 @@ def init_menu_bar():
 # Root window
 window = tk.Tk()
 window.title("Map creator")
+window.state("zoomed")
 init_menu_bar()
 
 # Canvas
@@ -523,7 +525,7 @@ w = img[0].width()
 
 canvas = tk.Canvas(window, width=w, height=h)
 canvas_container = canvas.create_image(0, 0, image=img[1], anchor='nw')
-canvas.pack(side="left", fill="both", expand="yes")
+canvas.pack(side="left", fill="both", expand=True)
 # Canvas event handlers
 canvas.bind("<Button-1>", handle_canvas_m1)
 window.bind_all('<KeyPress-p>', print_converted_path)
