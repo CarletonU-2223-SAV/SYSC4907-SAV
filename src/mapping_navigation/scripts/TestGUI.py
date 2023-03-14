@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import math
+import os
 import tkinter as tk
 from typing import List, Tuple
 
@@ -32,6 +33,9 @@ NH_intersection_4 = Point(645, 229, RoadSegmentType.INTERSECTION)
 NH_intersection_5 = Point(645, 22, RoadSegmentType.INTERSECTION)
 NH_intersection_6 = Point(1195, 573, RoadSegmentType.INTERSECTION)
 NH_intersection_7 = Point(1195, 22, RoadSegmentType.INTERSECTION)
+NH_intersection_8 = Point(1195, 993, RoadSegmentType.INTERSECTION)
+NH_intersection_9 = Point(89, 993, RoadSegmentType.INTERSECTION)
+NH_intersection_10 = Point(645, 993, RoadSegmentType.INTERSECTION)
 
 C_startpoint = Point(614, 589, RoadSegmentType.TURN)
 C_point1 = Point(632, 564, RoadSegmentType.STRAIGHT)
@@ -115,6 +119,7 @@ NH_edges = [
     (NH_startpoint, NH_intersection_1, {"weight": find_edge_weight(NH_startpoint, NH_intersection_1)}),
     (NH_startpoint, NH_intersection_4, {"weight": find_edge_weight(NH_startpoint, NH_intersection_4)}),
     (NH_startpoint, NH_intersection_6, {"weight": find_edge_weight(NH_startpoint, NH_intersection_6)}),
+    (NH_startpoint, NH_intersection_10, {"weight": find_edge_weight(NH_startpoint, NH_intersection_10)}),
     (NH_intersection_1, NH_intersection_2, {"weight": find_edge_weight(NH_intersection_1, NH_intersection_2)}),
     (NH_intersection_2, NH_intersection_3, {"weight": find_edge_weight(NH_intersection_2, NH_intersection_3)}),
     (NH_intersection_2, NH_intersection_4, {"weight": find_edge_weight(NH_intersection_2, NH_intersection_4)}),
@@ -122,7 +127,9 @@ NH_edges = [
     (NH_intersection_4, NH_intersection_2, {"weight": find_edge_weight(NH_intersection_4, NH_intersection_2)}),
     (NH_intersection_4, NH_intersection_5, {"weight": find_edge_weight(NH_intersection_4, NH_intersection_5)}),
     (NH_intersection_5, NH_intersection_7, {"weight": find_edge_weight(NH_intersection_5, NH_intersection_7)}),
-    (NH_intersection_6, NH_intersection_6, {"weight": find_edge_weight(NH_intersection_6, NH_intersection_6)})
+    (NH_intersection_6, NH_intersection_7, {"weight": find_edge_weight(NH_intersection_6, NH_intersection_7)}),
+    (NH_intersection_6, NH_intersection_8, {"weight": find_edge_weight(NH_intersection_6, NH_intersection_8)}),
+    (NH_intersection_1, NH_intersection_9, {"weight": find_edge_weight(NH_intersection_1, NH_intersection_9)})
 ]
 
 C_edges = [
@@ -298,7 +305,7 @@ def find_shortest_path(graph: nx.Graph(), start_node: Point, end_node: Point) ->
     return nx.dijkstra_path(graph, start_node, end_node)
 
 # Add destination node to graph
-def add_dest_node(graph: nx.Graph(), end_node: Point, node_list: List[Point]):
+def add_dest_node(graph: nx.Graph(), end_node: Point) -> bool:
     closest_edge = None
     closest_distance = 100000
     end_point = Point2(end_node.x, end_node.y)
@@ -312,18 +319,19 @@ def add_dest_node(graph: nx.Graph(), end_node: Point, node_list: List[Point]):
             closest_edge = edge
             closest_distance = distance
 
-    graph.add_node(end_node)
+    #checks if chosen end-point is on the road
     if closest_distance < 20:
+        canvas.delete("popup")
+        graph.add_node(end_node)
         node1, node2 = closest_edge
         graph.remove_edge(node1, node2)
         graph.add_edge(node1, end_node, weight=find_edge_weight(node1, end_node))
         graph.add_edge(node2, end_node, weight=find_edge_weight(node2, end_node))
+        return True
     else:
-        closest_node: Point = Point(10000, 10000, RoadSegmentType.STRAIGHT)
-        for node in node_list:
-            if find_edge_weight(end_node, node) < find_edge_weight(end_node, closest_node):
-                closest_node = node
-        graph.add_edge(end_node, closest_node, weight=find_edge_weight(end_node, closest_node))
+        canvas.delete("popup")
+        canvas.create_text(1550, 100, text="Error: Click on the roads to select a location.", font=("Arial", 20), fill="red", tags="popup")
+        return False
 
 
 def straight_point_formula(start: Point, end: Point, i: int) -> Tuple[float, float]:
@@ -402,25 +410,26 @@ def handle_canvas_m1(event):
         if current_image == NH and NH_G.has_node(dest_node):
             neighbor_nodes = list(NH_G.neighbors(dest_node))
             NH_G.remove_node(dest_node)
-            if len(neighbor_nodes) > 1:
-                node1, node2 = neighbor_nodes
-                NH_G.add_edge(node1, node2, weight=find_edge_weight(node1, node2))
+            node1, node2 = neighbor_nodes
+            NH_G.add_edge(node1, node2, weight=find_edge_weight(node1, node2))
+
         elif current_image == CITY and C_G.has_node(dest_node):
             neighbor_nodes = list(C_G.neighbors(dest_node))
             C_G.remove_node(dest_node)
-            if len(neighbor_nodes) > 1:
-                node1, node2 = neighbor_nodes
-                C_G.add_edge(node1, node2, weight=find_edge_weight(node1, node2))
+            node1, node2 = neighbor_nodes
+            C_G.add_edge(node1, node2, weight=find_edge_weight(node1, node2))
 
     #adding chosen node to graph
     dest_node = Point(x, y, RoadSegmentType.STRAIGHT)
     path: List[Point] = []
     if current_image == NH:
-        add_dest_node(NH_G, dest_node, NH_pointList)
+        if not add_dest_node(NH_G, dest_node):
+            return
         path = find_shortest_path(NH_G, NH_startpoint, dest_node)
         path = optimize_path(path)
     elif current_image == CITY:
-        add_dest_node(C_G, dest_node, C_pointList)
+        if not add_dest_node(C_G, dest_node):
+            return
         path = find_shortest_path(C_G, C_startpoint, dest_node)
 
     #create line on canvas showing generated path
@@ -507,8 +516,8 @@ window.title("Map creator")
 init_menu_bar()
 
 # Canvas
-img = [ImageTk.PhotoImage(Image.open('AirSim_maps/City_Top.png')),
-       ImageTk.PhotoImage(Image.open('AirSim_maps/NH_Top.png'))]
+img = [ImageTk.PhotoImage(Image.open(os.path.normpath(os.getcwd() + os.sep + os.pardir)+"/AirSimMaps/maps/City_Top.png")),
+       ImageTk.PhotoImage(Image.open(os.path.normpath(os.getcwd() + os.sep + os.pardir)+"/AirSimMaps/maps/NH_Top.png"))]
 h = img[0].height()
 w = img[0].width()
 
