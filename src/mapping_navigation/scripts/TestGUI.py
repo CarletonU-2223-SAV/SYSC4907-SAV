@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import math
 import tkinter as tk
-from typing import List
+from typing import List, Tuple
 
 import networkx as nx
 import MapSerializer as MS
@@ -323,73 +323,68 @@ def add_dest_node(graph: nx.Graph(), end_node: Point, node_list: List[Point]):
         graph.add_edge(end_node, closest_node, weight=find_edge_weight(end_node, closest_node))
 
 
+def straight_point_formula(start: Point, end: Point, i: int) -> Tuple[float, float]:
+    interval = 25
+    distance = find_edge_weight(start, end)
+    x = start.x + i * interval * (end.x - start.x) / distance
+    y = start.y + i * interval * (end.y - start.y) / distance
+    return x, y
+
 # creates points along a straight path
-def straight_path_points(start_point: Point, end_point: Point, interval: int) -> List:
+def generate_straight_points(start_point: Point, end_point: Point) -> List:
+    interval = 25
     distance = find_edge_weight(start_point, end_point)
     num_points_straight = int(distance / interval)
 
     # create points along straight road
     points_straight = []
-    for j in range(1, num_points_straight):
-        x = start_point.x + j * interval * (end_point.x - start_point.x) / distance
-        y = start_point.y + j * interval * (end_point.y - start_point.y) / distance
+    for j in range(2, num_points_straight):
+        x, y = straight_point_formula(start_point, end_point, j)
         points_straight.append(Point(x, y, RoadSegmentType.STRAIGHT))
     return points_straight
 
+# creates points along an intersection
+def generate_curve(start_point: Point, mid_point: Point, end_point: Point, num_points: int) -> List[Point]:
+    points = []
+    for i in range(num_points):
+        t = i / (num_points - 1)
+        p = quadratic_bezier(t, start_point, mid_point, end_point)
+        points.append(p)
+    return points
+
+def quadratic_bezier(t: float, p0: Point, p1: Point, p2: Point) -> Point:
+    x = (1 - t) ** 2 * p0.x + 2 * (1 - t) * t * p1.x + t ** 2 * p2.x
+    y = (1 - t) ** 2 * p0.y + 2 * (1 - t) * t * p1.y + t ** 2 * p2.y
+    return Point(x, y, RoadSegmentType.INTERSECTION)
+
 # optimize path by adding more points on straight roads and a curved path at intersections
 def optimize_path(path: List[Point]) -> List[Point]:
-    interval = 25
-
-    new_path = [[path[0]]]
+    start_point = path[0]
+    end_point = path[-1]
+    second_last_end_point = path[-2]
+    new_path = [start_point]
 
     for i in range(len(path) - 2):
-        start_point = path[i]
-        end_point = path[i + 1]
-        next_point = path[i + 2]
-
-        points_straight = straight_path_points(start_point, end_point, interval)
-
-        new_path.append(points_straight)
+        first_point = path[i]
+        second_point = path[i + 1]
+        third_point = path[i + 2]
+        straight_points = generate_straight_points(first_point, second_point)
+        new_path.extend(straight_points)
 
         # create points along intersection
         if len(path) > 2 and i < (len(path) - 2):
-            points_curve = []
+            num_points_curve = 4
+            start_of_inter = straight_points[-1]
+            end_x, end_y = straight_point_formula(second_point, third_point, 1)
+            end_of_inter = Point(end_x, end_y, RoadSegmentType.STRAIGHT)
+            curve_points = generate_curve(start_of_inter, second_point, end_of_inter, num_points_curve)
+            new_path.extend(curve_points)
 
-            if not (start_point.x == end_point.x and end_point.x == next_point.x) or not (start_point.y == end_point.y and end_point.y == next_point.y):
-                num_points_curve = 5
-                radius = 33
-                start_point = points_straight[-1]
-                end_x = end_point.x + 1 * interval * (next_point.x - end_point.x) / find_edge_weight(next_point, end_point)
-                end_y = end_point.y + 1 * interval * (next_point.y - end_point.y) / find_edge_weight(next_point, end_point)
-                # Calculate control point
-                dx = end_x - start_point.x
-                dy = end_y - start_point.y
-                theta = math.atan2(dy, dx)
-                x_offset = radius * math.sin(theta)
-                y_offset = radius * math.cos(theta)
-                control_point = (end_x - x_offset, end_y + y_offset)
+    straight_points = generate_straight_points(second_last_end_point, end_point)
+    new_path.extend(straight_points)
+    new_path.append(end_point)
 
-                # Generate Bezier curve
-                for j in range(num_points_curve):
-                    t = j / (num_points_curve - 1)
-                    x = (1 - t) ** 2 * start_point.x + 2 * (1 - t) * t * control_point[0] + t ** 2 * end_x
-                    y = (1 - t) ** 2 * start_point.y + 2 * (1 - t) * t * control_point[1] + t ** 2 * end_y
-                    points_curve.append(Point(x, y, RoadSegmentType.INTERSECTION))
-            else:
-                points_curve = straight_path_points(end_point, next_point)
-
-            new_path.append(points_curve)
-
-    points_straight = straight_path_points(path[-2], path[-1], interval)
-    new_path.append(points_straight)
-
-    new_path.append([path[-1]])
-
-    merged_list = []
-    for sublist in new_path:
-        merged_list.extend(sublist)
-
-    return merged_list
+    return new_path
 
 
 # create path from clicking on canvas
@@ -423,7 +418,6 @@ def handle_canvas_m1(event):
     if current_image == NH:
         add_dest_node(NH_G, dest_node, NH_pointList)
         path = find_shortest_path(NH_G, NH_startpoint, dest_node)
-        print(path)
         path = optimize_path(path)
     elif current_image == CITY:
         add_dest_node(C_G, dest_node, C_pointList)
