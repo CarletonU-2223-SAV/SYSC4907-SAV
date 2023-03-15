@@ -31,10 +31,8 @@ NAME = 6
 
 class StopSignDetector:
     def __init__(self):
-        path = Path(__file__).parent
-        self.stop_cascade = cv2.CascadeClassifier(str(path/'stop_sign.xml'))
-        self.model = torch.hub.load('ultralytics/yolov5', 'yolov5s')
-        self.model.eval()
+        # self.model = torch.hub.load('ultralytics/yolov5', 'yolov5s')
+        # self.model.eval()
         self.pub = rospy.Publisher("stop_sign_detection", DetectionResults, queue_size=1)
         rospy.init_node('new_stop_sign_detector', anonymous=True)
 
@@ -43,9 +41,7 @@ class StopSignDetector:
         rospy.spin()
 
     def handle_image(self, combine: SceneDepth):
-        img1d = np.frombuffer(combine.scene.data, dtype=np.uint8)
-        #img_imcode = cv2.imdecode(img1d, cv2.IMREAD_COLOR)
-        img_rgb = img1d.reshape(combine.scene.height, combine.scene.width, 3)
+        img_rgb = np.frombuffer(combine.scene.data, dtype=np.uint8).reshape(combine.scene.height, combine.scene.width, 3)
         res: List[DetectionResult] = self.detect_objects(img_rgb)
 
         # Match with scene depth
@@ -72,27 +68,37 @@ class StopSignDetector:
             detect.depth = med / DEPTH_RES * MAX_DEPTH
 
             cv2.putText(img_rgb, f'{detect.name}: {detect.depth}', (x2 + PADDING, y2), NORMAL_FONT, 0.3, GREEN)
+            cv2.rectangle(img_rgb, (detect.xmin, detect.ymin), (detect.xminx + detect.xmax, detect.ymin + detect.ymax), (0, 0, 255), 2)
 
         cv2.imshow('Stop Signs', img_rgb)
         cv2.waitKey(1)
+
 
         rospy.loginfo(res)
         self.pub.publish(res)
 
     def detect_objects(self, img_rgb):
         # return detection results consisting of bounding boxes and classes
-        results = self.model(img_rgb)
-        results.print()
+        # results = self.model(img_rgb)
+        # results.print()
         res_list: List[Tuple[float, float, float, float, float, int, str]]
-        '''gray = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)
-        stops = self.stop_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(20, 20))'''
-        res_list = results.pandas().xyxy[0].to_numpy().tolist()
+        gray_img = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)
+        path = Path(__file__).parent
+        stop_cascade = cv2.CascadeClassifier(str(path / 'stop_sign.xml'))
+        stops = stop_cascade.detectMultiScale(gray_img, scaleFactor=1.008, minNeighbors=10, minSize=(50, 50))
+        # res_list = results.pandas().xyxy[0].to_numpy().tolist()
+        res_list = []
 
         detect_results = []
         # important detection classes we care about
         imp_classes = {
             11: 'stop sign'
         }
+        confidence = 0.7
+        for i, stop_coords in enumerate(stops):
+            x, y, w, h = stop_coords
+            res_tuple = (x, y, w, h, confidence, 11, 'stop sign')
+            res_list.append(res_tuple)
         for elem in res_list:
             # Skip adding the result if not a relevant class
             if elem[CLASS_NUM] not in imp_classes:
@@ -106,6 +112,9 @@ class StopSignDetector:
             dr.confidence = elem[CONFIDENCE]
             dr.class_num = elem[CLASS_NUM]
             dr.name = elem[NAME]
+            file = open('DetectionResult.txt', 'w')
+            file.write(dr + "\n")
+            file.close()
             detect_results.append(dr)
 
         return detect_results

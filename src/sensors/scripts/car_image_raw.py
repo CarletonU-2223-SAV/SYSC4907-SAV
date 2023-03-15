@@ -53,6 +53,7 @@ def airpub():
         ]
 
         img_rgb_string = responses[UNCOMPRESSED_RGB].image_data_uint8
+
         # rospy.loginfo(responses[DEBUG])
 
         # Uncompressed Image message of scene
