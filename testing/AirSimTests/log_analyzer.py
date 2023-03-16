@@ -136,6 +136,7 @@ class LogAnalyzer:
                     f.write('**Warnings:**\n')
                     for warning in self.warnings:
                         f.write(f'- {warning}\n')
+                        f.write('\n')
 
                 image_path = Path(__file__).parent / 'img' / f'{self.test_case}.png'
                 from images_upload_cli.upload import imgur_upload
