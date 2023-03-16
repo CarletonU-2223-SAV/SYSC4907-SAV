@@ -13,6 +13,21 @@ class RoadSegmentType(Enum):
     TURN = 1
     INTERSECTION = 2
 
+
+def point_to_gui_coords(point: Tuple[float, float], map_choice: int) -> Tuple[float, float]:
+    # weird inversion correction due to the AirSim map being "upside-down"
+    x, y = point[Y_COORD], -point[X_COORD]
+
+    # scale correction
+    c1 = (x * MapModel.AirSim_scale_factor[map_choice],
+          y * MapModel.AirSim_scale_factor[map_choice])
+    # re-centering correction factor
+    c2 = (c1[X_COORD] - MapModel.AirSim_correction_factor[map_choice][X_COORD],
+          c1[Y_COORD] - MapModel.AirSim_correction_factor[map_choice][Y_COORD])
+
+    return c2
+
+
 # Model a point on the canvas
 class Point:
     def __init__(self, x, y, seg_type: RoadSegmentType):
@@ -20,18 +35,8 @@ class Point:
         self.y = y
         self.seg_type = seg_type
 
-    def point_to_gui_coords(self, map_choice: int) -> Tuple[float, float]:
-        # weird inversion correction due to the AirSim map being "upside-down"
-        x, y = self.y, -self.x
-
-        # scale correction
-        c1 = (x * MapModel.AirSim_scale_factor[map_choice],
-              y * MapModel.AirSim_scale_factor[map_choice])
-        # re-centering correction factor
-        c2 = (c1[X_COORD] - MapModel.AirSim_correction_factor[map_choice][X_COORD],
-              c1[Y_COORD] - MapModel.AirSim_correction_factor[map_choice][Y_COORD])
-
-        return c2
+    def to_gui_coords(self, map_choice: int) -> Tuple[float, float]:
+        return point_to_gui_coords((self.x, self.y), map_choice)
 
     def __str__(self):
         return f'{(self.x, self.y, self.seg_type)}'

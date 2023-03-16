@@ -1,6 +1,6 @@
 import airsim
 import rospy
-from common.bridge import Bridge, CarControls
+from common.bridge import Bridge, CarControls, Vector
 from numpy import ndarray
 
 
@@ -33,7 +33,8 @@ class AirSimBridge(Bridge):
         return self.client.getCarControls().throttle
 
     def get_position(self):
-        return self.client.simGetGroundTruthKinematics("").position
+        position = self.client.simGetGroundTruthKinematics("").position
+        return Vector(position.x_val, position.y_val, position.z_val)
 
     def get_orientation(self):
         return self.client.getCarState().kinematics_estimated.orientation

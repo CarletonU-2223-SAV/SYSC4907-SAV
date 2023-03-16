@@ -1,6 +1,6 @@
 from abc import ABC
 import numpy as np
-from typing import List
+from typing import List, Tuple
 
 _instance = None
 
@@ -28,6 +28,12 @@ class Vector:
         self.x_val = x_val
         self.y_val = y_val
         self.z_val = z_val
+
+    def two_tuple(self) -> Tuple[float, float]:
+        return self.x_val, self.y_val
+
+    def three_tuple(self) -> Tuple[float, float, float]:
+        return self.x_val, self.y_val, self.z_val
 
 
 class Quaternion:

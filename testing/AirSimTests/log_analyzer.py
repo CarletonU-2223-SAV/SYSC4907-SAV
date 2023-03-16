@@ -1,15 +1,17 @@
-import pickle
+import json
 import sys
+from types import SimpleNamespace
 from datetime import datetime
 from pathlib import Path
 from typing import List, Tuple, Optional
 import MapSerializer as MapSerializer
-from Models import Point as PointModel, RoadSegmentType
 from PIL import Image, ImageDraw, ImageColor
-from sympy import Point2D, Point, Segment
-from vehicle_logging import LogEntry
+from sympy import Point, Segment
+from common.models import LogEntry
+from Models import X_COORD, Y_COORD
 
 TARGET_AREA = 100.0
+TARGET_TIME = 150
 MAX_STEERING = 1.0
 NH = 'NH'
 CITY = 'CITY'
@@ -24,115 +26,148 @@ ENV_IDS = {
     CITY: 1,
 }
 
-DATE = 'date'
-POS_AIRSIM = 'pos_airsim'
-POS_GUI = 'pos_gui'
-STEERING = 'steering'
-THROTTLE = 'throttle'
-COLLISIONS = 'collided'
-
 PR_COMMENT_FLAG = '--pr-branch'
 
-metrics = []
-warnings = []
 
+class LogAnalyzer:
+    def __init__(self, test_case: str, pr_branch: Optional[str]):
+        self.test_case = test_case
+        self.pr_branch = pr_branch
 
-def analyze_time(times: List[datetime]):
-    delta = (datetime.now() - times[0]).days
-    if delta > 7:
-        # Give warning if test log is over a week old
-        warnings.append(f'Test log is old ({delta} days)')
+        filepath = Path(__file__).parent / 'log' / f'{self.test_case}.log'
+        env = str(filepath).split('_')[0]
+        map_path = Path(__file__).parents[2] / 'src' / 'mapping_navigation' / 'paths' / f'{self.test_case}.pickle'
+        map_model = MapSerializer.load_from_filename(str(map_path))
 
+        with open(filepath, 'r') as f:
+            self.log: List[LogEntry] = json.load(f, object_hook=lambda d: SimpleNamespace(**d))
 
-def analyze_steering(val: str):
-    # TODO Implement check
-    if abs(float(val)) > MAX_STEERING:
-        raise Exception('Steering exceeded maximum safe value.')
+        if not self.log:
+            raise Exception('No data to analyze')
 
+        pickle_path = [Point(x, y, evaluate=False) for x, y, _ in map_model.convert_path(0)]
+        self.path_img = PathImage(map_model.paths[0].get_gui_coords(), env)
 
-def analyze_collisions(log: List[LogEntry]):
-    for i, entry in enumerate(log):
-        if entry.has_collided:
-            start_time = log[0].time
-            collision_time = entry.time
-            delta = collision_time - start_time
-            position = f'({log[i].pos.x_val:.2f}, {log[i].pos.y_val:.2f})'
-            warnings.append(f'Collision detected at {collision_time},'
-                            f' position {position} (after {delta.seconds} seconds).')
-            return
+        self.segments = []
+        for i in range(len(pickle_path) - 1):
+            self.segments.append(Segment(pickle_path[i], pickle_path[i + 1]))
 
+        self.metrics = []
+        self.warnings = []
+        self.warning_marks = 0
+        self.incident_positions = []
 
-def analyze_path(actual: List[Point2D], expected: List[Point2D]):
-    if not actual or not expected:
-        raise Exception('Could not find points to analyze')
+    def analyze_timestamp(self):
+        delta = (datetime.now() - datetime.strptime(self.log[0].time, "%Y-%m-%d %H:%M:%S")).days
+        if delta > 7:
+            # Give warning if test log is over a week old
+            self.warnings.append(f'Test log is old ({delta} days)')
 
-    segments = []
-    for i in range(len(expected) - 1):
-        segments.append(Segment(expected[i], expected[i + 1]))
+    def analyze_steering(self, entry: LogEntry):
+        if abs(entry.steering) > MAX_STEERING:
+            self.warning_marks += 1
+            self.warnings.append(f'Steering exceeded target value (incident {self.warning_marks})')
+            self.incident_positions.append(entry.pos)
 
-    area = 0.0
-    for i, point in enumerate(actual[1:]):
+    def analyze_point(self, current_point: Tuple[float, float], last_point: Tuple[float, float]):
+        point_tuple = current_point
+
         # Get shortest distance to pre-computed segments
-        distance = min([s.distance(point) for s in segments])
+        distance = min([s.distance(point_tuple) for s in self.segments])
 
         # Estimate area as a rectangle bounded by distance between point and segment with last point
-        area += distance * (point.distance(actual[i]))
-    metrics.append(f'Area between target and actual path is {area:.2f}. Target value is {TARGET_AREA:.2f}')
+        return distance * (Point(point_tuple).distance(last_point))
+
+    def analyze_speed(self, start_time: datetime, end_time: datetime):
+        delta = (end_time - start_time).seconds
+        self.metrics.append(f'Log runtime was {delta} seconds. Target value is {TARGET_TIME}')
+
+    def analyze(self):
+        last_point: Tuple[float, float] = self.log[0].pos
+        start_time: Optional[datetime] = None
+        end_time: Optional[datetime] = None
+        area = 0.0
+        for entry in self.log:
+            if start_time is None and (entry.pos[X_COORD] - last_point[X_COORD] < 1
+                                       or entry.pos[Y_COORD] - last_point[Y_COORD] < 1):
+                start_time = datetime.strptime(entry.time, "%Y-%m-%d %H:%M:%S")
+
+            point_tuple = entry.pos
+            self.path_img.draw_actual_segment(last_point, point_tuple)
+
+            area += self.analyze_point(entry.pos, last_point)
+            self.analyze_steering(entry)
+
+            if entry.has_collided:
+                end_time = datetime.strptime(entry.time, "%Y-%m-%d %H:%M:%S")
+                self.path_img.draw_collision_point(point_tuple)
+                self.warnings.append(f'Collision detected at {entry.time},'
+                                     f' position {entry.pos} (after {(end_time - start_time).seconds} seconds).')
+                break
+
+            if (entry.pos[X_COORD] - self.log[-1].pos[X_COORD] < 1
+                    and entry.pos[Y_COORD] - self.log[-1].pos[Y_COORD] < 1):
+                # Reached end of path, log end time
+                end_time = datetime.strptime(entry.time, "%Y-%m-%d %H:%M:%S")
+                break
+
+            end_time = datetime.strptime(entry.time, "%Y-%m-%d %H:%M:%S")
+            last_point = entry.pos
+
+        self.metrics.append(f'Area between target and actual path is {area:.2f}. Target value is {TARGET_AREA:.2f}')
+        self.analyze_speed(start_time, end_time)
+        self.path_img.save(f'{self.test_case}.png')
+
+        if self.pr_branch:
+            # Running on GitHub for a PR, log metrics to a file
+            pr_message_path = Path(__file__).parents[2] / 'pr_message.txt'
+            with open(pr_message_path, 'w') as f:
+                branch_name, commit_hash = self.pr_branch.split(',')
+                f.write(f'### Analysis for commit {commit_hash[:7]} on branch {branch_name}\n')
+                for metric in self.metrics:
+                    f.write(f'- {metric}\n')
+                f.write('\n')
+                if self.warnings:
+                    f.write('**Warnings:**\n')
+                    for warning in self.warnings:
+                        f.write(f'- {warning}\n')
 
 
-def analyze(test_case: str, pr_branch: Optional[str]):
-    filepath = Path(__file__).parent / 'log' / f'{test_case}.log'
-    env = str(filepath).split('_')[0]
-    map_path = Path(__file__).parents[2] / 'src' / 'mapping_navigation' / 'paths' / f'{test_case}.pickle'
-    map_model = MapSerializer.load_from_filename(str(map_path))
+class PathImage:
+    EXPECTED_COLOUR = ImageColor.getrgb('red')
+    ACTUAL_COLOUR = ImageColor.getrgb('blue')
+    COLLISION_COLOUR = ImageColor.getrgb('red')
+    INCIDENT_COLOUR = ImageColor.getrgb('blue')
+    INCIDENT_TEXT = ImageColor.getrgb('white')
+    INCIDENT_RADIUS = 5
 
-    with open(filepath, 'r') as f:
-        log: List[LogEntry] = pickle.load(f)
+    def __init__(self, expected: List[Tuple[float, float]], env: str):
+        self.img = Image.open(BACKGROUNDS[env])
+        self.draw = ImageDraw.Draw(self.img)
 
-    pickle_path = [Point(x, y, evaluate=False) for x, y, _ in map_model.convert_path(0)]
-    analyze_time([entry.time for entry in log])
-    analyze_path([Point(entry.pos.x_val, entry.pos.y_val) for entry in log], pickle_path)
-    analyze_collisions(log)
+        last_coords = expected.pop(0)
+        for current_coords in expected:
+            # Overlay pickle line
+            self.draw.line([last_coords, current_coords], self.EXPECTED_COLOUR, 3)
+            last_coords = current_coords
 
-    if pr_branch:
-        # Running on GitHub for a PR, log metrics to a file
-        pr_message_path = Path(__file__).parents[2] / 'pr_message.txt'
-        with open(pr_message_path, 'w') as f:
-            branch_name, commit_hash = pr_branch.split(',')
-            f.write(f'### Analysis for commit {commit_hash[:7]} on branch {branch_name}\n')
-            for metric in metrics:
-                f.write(f'- {metric}\n')
-            f.write('\n')
-            if warnings:
-                f.write('**Warnings:**\n')
-                for warning in warnings:
-                    f.write(f'- {warning}\n')
-    else:
-        # Draw paths if script is manually run
-        points = [PointModel(entry.pos.x_val, entry.pos.y_val, RoadSegmentType.STRAIGHT) for entry in log]
-        draw_path(
-            [point.point_to_gui_coords(ENV_IDS[env]) for point in points],
-            map_model.paths[0].get_gui_coords(),
-            env,
-            f'{test_case}.png'
-        )
+    def save(self, save_path: str):
+        self.img.save(f'img/{save_path}')
 
+    def draw_actual_segment(self, start: Tuple[float, float], end: Tuple[float, float]):
+        self.draw.line([start, end], self.ACTUAL_COLOUR, 3)
 
-def draw_path(actual: List[Tuple[float, float]], expected: List[Tuple[float, float]], env: str, save_path: str):
-    """
-    Use this to create an image comparing the vehicle's actual path with its pickle file
-    """
-    paths = [(actual, ImageColor.getrgb('blue')), (expected, ImageColor.getrgb('red'))]
-    with Image.open(BACKGROUNDS[env]) as img:
-        draw = ImageDraw.Draw(img)
-        for i, (path, colour) in enumerate(paths):
-            last_coords = path.pop(0)
-            for current_coords in path:
-                # Overlay pickle line
-                draw.line([last_coords, current_coords], colour, 3)
-                last_coords = current_coords
-        img.save(f'img/{save_path}')
-    pass
+    def draw_collision_point(self, point: Tuple[float, float]):
+        self.draw.text(point, "X", self.COLLISION_COLOUR)
+
+    def draw_incidents(self, incidents: List[Tuple[float, float]]):
+        for i, (x, y) in enumerate(incidents):
+            self.draw.ellipse(
+                (x - self.INCIDENT_RADIUS, y - self.INCIDENT_RADIUS,
+                 x + self.INCIDENT_RADIUS, y + self.INCIDENT_RADIUS),
+                fill=self.INCIDENT_COLOUR
+            )
+            self.draw.text((x, y), str(i + 1), self.INCIDENT_TEXT)
 
 
 if __name__ == '__main__':
@@ -150,4 +185,4 @@ if __name__ == '__main__':
             else:
                 case = arg
 
-    analyze(case, branch)
+    LogAnalyzer(case, branch).analyze()
