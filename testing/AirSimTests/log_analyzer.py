@@ -161,7 +161,7 @@ class PathImage:
             last_coords = current_coords
 
     def save(self, save_path: str):
-        self.img.save(f'img/{save_path}')
+        self.img.save(Path(__file__).parent / 'img' / f'{save_path}')
 
     def draw_actual_segment(self, start: Tuple[float, float], end: Tuple[float, float]):
         self.draw.line([tuple(start), tuple(end)], self.ACTUAL_COLOUR, 3)
