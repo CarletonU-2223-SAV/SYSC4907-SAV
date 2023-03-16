@@ -8,7 +8,7 @@ import MapSerializer as MapSerializer
 from PIL import Image, ImageDraw, ImageColor
 from sympy import Point, Segment
 from common.models import LogEntry
-from Models import X_COORD, Y_COORD
+from Models import X_COORD, Y_COORD, point_to_gui_coords
 
 TARGET_AREA = 100.0
 TARGET_TIME = 150
@@ -35,7 +35,8 @@ class LogAnalyzer:
         self.pr_branch = pr_branch
 
         filepath = Path(__file__).parent / 'log' / f'{self.test_case}.log'
-        env = str(filepath).split('_')[0]
+        env = self.test_case.split('_')[0]
+        self.env_id = ENV_IDS[env]
         map_path = Path(__file__).parents[2] / 'src' / 'mapping_navigation' / 'paths' / f'{self.test_case}.pickle'
         map_model = MapSerializer.load_from_filename(str(map_path))
 
@@ -93,7 +94,10 @@ class LogAnalyzer:
                 start_time = datetime.strptime(entry.time, "%Y-%m-%d %H:%M:%S")
 
             point_tuple = entry.pos
-            self.path_img.draw_actual_segment(last_point, point_tuple)
+            self.path_img.draw_actual_segment(
+                point_to_gui_coords(last_point, self.env_id),
+                point_to_gui_coords(point_tuple, self.env_id)
+            )
 
             area += self.analyze_point(entry.pos, last_point)
             self.analyze_steering(entry)
@@ -155,7 +159,7 @@ class PathImage:
         self.img.save(f'img/{save_path}')
 
     def draw_actual_segment(self, start: Tuple[float, float], end: Tuple[float, float]):
-        self.draw.line([start, end], self.ACTUAL_COLOUR, 3)
+        self.draw.line([tuple(start), tuple(end)], self.ACTUAL_COLOUR, 3)
 
     def draw_collision_point(self, point: Tuple[float, float]):
         self.draw.text(point, "X", self.COLLISION_COLOUR)
