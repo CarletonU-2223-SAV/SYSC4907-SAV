@@ -12,7 +12,7 @@ from Models import X_COORD, Y_COORD, point_to_gui_coords
 
 TARGET_AREA = 100.0
 TARGET_TIME = 150
-MAX_STEERING = 1.0
+MAX_STEERING = 0.20
 NH = 'NH'
 CITY = 'CITY'
 
