@@ -68,7 +68,7 @@ class LogAnalyzer:
         if abs(entry.steering) > MAX_STEERING:
             self.warning_marks += 1
             self.warnings.append(f'Steering exceeded target value (incident {self.warning_marks})')
-            self.incident_positions.append(entry.pos)
+            self.incident_positions.append(point_to_gui_coords(entry.pos, self.env_id))
 
     def analyze_point(self, current_point: Tuple[float, float], last_point: Tuple[float, float]):
         point_tuple = current_point
@@ -101,10 +101,11 @@ class LogAnalyzer:
 
             area += self.analyze_point(entry.pos, last_point)
             self.analyze_steering(entry)
+            self.path_img.draw_incidents(self.incident_positions)
 
             if entry.has_collided:
                 end_time = datetime.strptime(entry.time, "%Y-%m-%d %H:%M:%S")
-                self.path_img.draw_collision_point(point_tuple)
+                self.path_img.draw_collision_point(point_to_gui_coords(point_tuple, self.env_id))
                 self.warnings.append(f'Collision detected at {entry.time},'
                                      f' position {entry.pos} (after {(end_time - start_time).seconds} seconds).')
                 break
@@ -176,7 +177,7 @@ class PathImage:
                  x + self.INCIDENT_RADIUS, y + self.INCIDENT_RADIUS),
                 fill=self.INCIDENT_COLOUR
             )
-            self.draw.text((x, y), str(i + 1), self.INCIDENT_TEXT)
+            self.draw.text((x - 2, y - 5), str(i + 1), self.INCIDENT_TEXT)
 
 
 if __name__ == '__main__':
