@@ -123,7 +123,7 @@ class LogAnalyzer:
         self.path_img.save(f'{self.test_case}.png')
 
         if self.pr_branch:
-            # Running on GitHub for a PR, log metrics to a file
+            # Running on GitHub for a PR, log metrics to a file and upload image
             pr_message_path = Path(__file__).parents[2] / 'pr_message.txt'
             with open(pr_message_path, 'w') as f:
                 branch_name, commit_hash = self.pr_branch.split(',')
@@ -135,6 +135,11 @@ class LogAnalyzer:
                     f.write('**Warnings:**\n')
                     for warning in self.warnings:
                         f.write(f'- {warning}\n')
+
+                image_path = Path(__file__).parent / 'img' / f'{self.test_case}.png'
+                from images_upload_cli.upload import imgur_upload
+                url = imgur_upload(image_path.read_bytes())
+                f.write(f'![Path analysis]({url})')
 
 
 class PathImage:
