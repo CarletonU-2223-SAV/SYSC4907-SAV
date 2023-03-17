@@ -10,8 +10,8 @@ from sympy import Point, Segment
 from common.models import LogEntry
 from Models import X_COORD, Y_COORD, point_to_gui_coords, RoadSegmentType
 
-TARGET_AREA = 100.0
-TARGET_TIME = 150
+TARGET_AREA = 400.0
+TARGET_TIME = 60
 MAX_STEERING = 0.20
 NH = 'NH'
 CITY = 'CITY'
@@ -81,8 +81,9 @@ class LogAnalyzer:
         # Get shortest distance to pre-computed segments
         distance = min([s.distance(point_tuple) for s in self.segments])
 
-        # Estimate area as a rectangle bounded by distance between point and segment with last point
-        return distance * (Point(point_tuple).distance(last_point))
+        # Estimate area as a rectangle bounded by distance between point and segment with last point,
+        # weighted to represent a smaller number
+        return distance * (Point(point_tuple).distance(last_point)) / 1000.0
 
     def get_closest_seg_type(self, current_point: Tuple[float, float]) -> RoadSegmentType:
         closest = min(self.path.points, key=lambda x: Point(x.x, x.y).distance(current_point))
