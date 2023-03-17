@@ -8,7 +8,7 @@ import MapSerializer as MapSerializer
 from PIL import Image, ImageDraw, ImageColor
 from sympy import Point, Segment
 from common.models import LogEntry
-from Models import X_COORD, Y_COORD, point_to_gui_coords
+from Models import X_COORD, Y_COORD, point_to_gui_coords, RoadSegmentType
 
 TARGET_AREA = 100.0
 TARGET_TIME = 150
@@ -39,6 +39,7 @@ class LogAnalyzer:
         self.env_id = ENV_IDS[env]
         map_path = Path(__file__).parents[2] / 'src' / 'mapping_navigation' / 'paths' / f'{self.test_case}.pickle'
         map_model = MapSerializer.load_from_filename(str(map_path))
+        self.path = map_model.paths[0]
 
         with open(filepath, 'r') as f:
             self.log: List[LogEntry] = json.load(f, object_hook=lambda d: SimpleNamespace(**d))
@@ -46,8 +47,12 @@ class LogAnalyzer:
         if not self.log:
             raise Exception('No data to analyze')
 
+        for e in self.log:
+            # Convert AirSim coords to GUI format
+            e.pos = point_to_gui_coords(e.pos, self.env_id)
+
         pickle_path = [Point(x, y, evaluate=False) for x, y, _ in map_model.convert_path(0)]
-        self.path_img = PathImage(map_model.paths[0].get_gui_coords(), env)
+        self.path_img = PathImage(self.path.get_gui_coords(), env)
 
         self.segments = []
         for i in range(len(pickle_path) - 1):
@@ -68,7 +73,7 @@ class LogAnalyzer:
         if abs(entry.steering) > MAX_STEERING:
             self.warning_marks += 1
             self.warnings.append(f'Steering exceeded target value (incident {self.warning_marks})')
-            self.incident_positions.append(point_to_gui_coords(entry.pos, self.env_id))
+            self.incident_positions.append(entry.pos)
 
     def analyze_point(self, current_point: Tuple[float, float], last_point: Tuple[float, float]):
         point_tuple = current_point
@@ -78,6 +83,11 @@ class LogAnalyzer:
 
         # Estimate area as a rectangle bounded by distance between point and segment with last point
         return distance * (Point(point_tuple).distance(last_point))
+
+    def get_closest_seg_type(self, current_point: Tuple[float, float]) -> RoadSegmentType:
+        closest = min(self.path.points, key=lambda x: Point(x.x, x.y).distance(current_point))
+        print(f'{closest.seg_type}: {current_point}, ({closest.x}, {closest.y})')
+        return closest.seg_type
 
     def analyze_speed(self, start_time: datetime, end_time: datetime):
         delta = (end_time - start_time).seconds
@@ -94,18 +104,17 @@ class LogAnalyzer:
                 start_time = datetime.strptime(entry.time, "%Y-%m-%d %H:%M:%S")
 
             point_tuple = entry.pos
-            self.path_img.draw_actual_segment(
-                point_to_gui_coords(last_point, self.env_id),
-                point_to_gui_coords(point_tuple, self.env_id)
-            )
+            self.path_img.draw_actual_segment(last_point, point_tuple)
 
             area += self.analyze_point(entry.pos, last_point)
-            self.analyze_steering(entry)
+            closest_seg = self.get_closest_seg_type(point_tuple)
+            if closest_seg == RoadSegmentType.STRAIGHT:
+                self.analyze_steering(entry)
             self.path_img.draw_incidents(self.incident_positions)
 
             if entry.has_collided:
                 end_time = datetime.strptime(entry.time, "%Y-%m-%d %H:%M:%S")
-                self.path_img.draw_collision_point(point_to_gui_coords(point_tuple, self.env_id))
+                self.path_img.draw_collision_point(point_tuple)
                 self.warnings.append(f'Collision detected at {entry.time},'
                                      f' position {entry.pos} (after {(end_time - start_time).seconds} seconds).')
                 break
