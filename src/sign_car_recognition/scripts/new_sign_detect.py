@@ -41,7 +41,8 @@ class StopSignDetector:
         rospy.spin()
 
     def handle_image(self, combine: SceneDepth):
-        img_rgb = np.frombuffer(combine.scene.data, dtype=np.uint8).reshape(combine.scene.height, combine.scene.width, 3)
+        img_rgb = np.frombuffer(combine.scene.data, dtype=np.uint8).reshape(combine.scene.height, combine.scene.width,
+                                                                            3)
         res: List[DetectionResult] = self.detect_objects(img_rgb)
 
         # Match with scene depth
@@ -68,11 +69,11 @@ class StopSignDetector:
             detect.depth = med / DEPTH_RES * MAX_DEPTH
 
             cv2.putText(img_rgb, f'{detect.name}: {detect.depth}', (x2 + PADDING, y2), NORMAL_FONT, 0.3, GREEN)
-            cv2.rectangle(img_rgb, (detect.xmin, detect.ymin), (detect.xminx + detect.xmax, detect.ymin + detect.ymax), (0, 0, 255), 2)
+            cv2.rectangle(img_rgb, (detect.xmin, detect.ymin), (detect.xmin + detect.xmax, detect.ymin + detect.ymax),
+                          (0, 0, 255), 2)
 
         cv2.imshow('Stop Signs', img_rgb)
         cv2.waitKey(1)
-
 
         rospy.loginfo(res)
         self.pub.publish(res)
@@ -85,7 +86,7 @@ class StopSignDetector:
         gray_img = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)
         path = Path(__file__).parent
         stop_cascade = cv2.CascadeClassifier(str(path / 'stop_sign.xml'))
-        stops = stop_cascade.detectMultiScale(gray_img, scaleFactor=1.008, minNeighbors=10, minSize=(50, 50))
+        stops = stop_cascade.detectMultiScale(gray_img, scaleFactor=1.0095, minNeighbors=10, minSize=(20, 20))
         # res_list = results.pandas().xyxy[0].to_numpy().tolist()
         res_list = []
 
@@ -113,7 +114,7 @@ class StopSignDetector:
             dr.class_num = elem[CLASS_NUM]
             dr.name = elem[NAME]
             file = open('DetectionResult.txt', 'w')
-            file.write(dr + "\n")
+            file.write(str(dr))
             file.close()
             detect_results.append(dr)
 

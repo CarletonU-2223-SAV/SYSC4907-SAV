@@ -196,7 +196,7 @@ class CentralControl:
                         self.stop_state = StopState.STOPPING
                         self.car_controls.throttle = STOP_THROTTLE
                         self.car_controls.brake = HOLD_BRAKE
-                        self.bridge.set_controls(self.car_controls)
+                        #self.bridge.set_controls(self.car_controls)
                     elif sign.depth <= LOOKAHEAD_DEPTH:
                         self.cc_state.add(CCState.STREET_RULE)
                         self.stop_state = StopState.DETECTED
@@ -269,7 +269,7 @@ class CentralControl:
                 if self.stop_state == StopState.STOPPING:
                     self.car_controls.brake = HOLD_BRAKE
                     self.car_controls.throttle = STOP_THROTTLE
-                    self.bridge.set_controls(self.car_controls)
+                    #self.bridge.set_controls(self.car_controls)
 
                     if self.speed == STOPPED_SPEED:
                         # When you are stopped, you can start the resuming process
@@ -277,7 +277,7 @@ class CentralControl:
                 elif self.stop_state == StopState.RESUMING:
                     # Stop breaking
                     self.car_controls.brake = RELEASE_BRAKE
-                    self.bridge.set_controls(self.car_controls)
+                    #self.bridge.set_controls(self.car_controls)
 
                     # Count down cooldown period
                     if not self.sign_data:
