@@ -27,6 +27,16 @@ ENV_IDS = {
 }
 
 PR_COMMENT_FLAG = '--pr-branch'
+MAX_INTENSITY = 50
+
+
+def get_actual_transparency(intensity: int) -> Tuple[int, int, int]:
+    """Scale actual path colour intensity by number of lidar detections. Darker = more detections"""
+
+    # Cap intensity at MAX_INTENSITY
+    intensity = min(intensity, MAX_INTENSITY)
+    rg = intensity * 255 // MAX_INTENSITY
+    return rg, rg, 255
 
 
 class LogAnalyzer:
@@ -87,7 +97,6 @@ class LogAnalyzer:
 
     def get_closest_seg_type(self, current_point: Tuple[float, float]) -> RoadSegmentType:
         closest = min(self.path.points, key=lambda x: Point(x.x, x.y).distance(current_point))
-        print(f'{closest.seg_type}: {current_point}, ({closest.x}, {closest.y})')
         return closest.seg_type
 
     def analyze_speed(self, start_time: datetime, end_time: datetime):
@@ -99,13 +108,15 @@ class LogAnalyzer:
         start_time: Optional[datetime] = None
         end_time: Optional[datetime] = None
         area = 0.0
+        lidar_detections = 0
         for entry in self.log:
             if start_time is None and (entry.pos[X_COORD] - last_point[X_COORD] < 1
                                        or entry.pos[Y_COORD] - last_point[Y_COORD] < 1):
                 start_time = datetime.strptime(entry.time, "%Y-%m-%d %H:%M:%S")
 
             point_tuple = entry.pos
-            self.path_img.draw_actual_segment(last_point, point_tuple)
+            self.path_img.draw_actual_segment(last_point, point_tuple, entry.lidar_detections)
+            lidar_detections += entry.lidar_detections
 
             area += self.analyze_point(entry.pos, last_point)
             closest_seg = self.get_closest_seg_type(point_tuple)
@@ -130,6 +141,7 @@ class LogAnalyzer:
             last_point = entry.pos
 
         self.metrics.append(f'Area between target and actual path is {area:.2f}. Target value is {TARGET_AREA:.2f}')
+        self.metrics.append(f'Total objects detected by lidar: {lidar_detections}')
         self.analyze_speed(start_time, end_time)
         self.path_img.save(f'{self.test_case}.png')
 
@@ -175,8 +187,8 @@ class PathImage:
     def save(self, save_path: str):
         self.img.save(Path(__file__).parent / 'img' / f'{save_path}')
 
-    def draw_actual_segment(self, start: Tuple[float, float], end: Tuple[float, float]):
-        self.draw.line([tuple(start), tuple(end)], self.ACTUAL_COLOUR, 3)
+    def draw_actual_segment(self, start: Tuple[float, float], end: Tuple[float, float], lidar_detections: int):
+        self.draw.line([tuple(start), tuple(end)], get_actual_transparency(lidar_detections), 3)
 
     def draw_collision_point(self, point: Tuple[float, float]):
         self.draw.text(point, "X", self.COLLISION_COLOUR)

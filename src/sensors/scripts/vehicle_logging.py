@@ -6,15 +6,21 @@ from datetime import datetime
 from typing import List
 from common.bridge import get_bridge
 from common.models import LogEntry
+from std_msgs.msg import Float64MultiArray
 
 
 class Logging:
     def __init__(self):
         self.client = get_bridge()
         rospy.init_node('logging', anonymous=True)
+        rospy.Subscriber('new_lidar_data', Float64MultiArray, self.update_detections)
         rospy.on_shutdown(self.write_log)
         self.rate = rospy.Rate(1)  # 1 Hz
         self.log: List[LogEntry] = []
+        self.current_detections = 0
+
+    def update_detections(self, lidar_data: Float64MultiArray):
+        self.current_detections = len(lidar_data.data)
 
     def create_log(self):
         while not rospy.is_shutdown():
@@ -23,7 +29,7 @@ class Logging:
             steering = self.client.get_steering()
             throttle = self.client.get_throttle()
             has_collided = self.client.has_collided()
-            self.log.append(LogEntry(time, pos, steering, throttle, has_collided))
+            self.log.append(LogEntry(time, pos, steering, throttle, has_collided, self.current_detections))
             self.rate.sleep()
 
     def write_log(self):
