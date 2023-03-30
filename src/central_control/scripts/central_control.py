@@ -197,8 +197,6 @@ class CentralControl:
                         self.stop_state = StopState.STOPPING
                         self.car_controls.throttle = STOP_THROTTLE
                         self.car_controls.brake = HOLD_BRAKE
-                        #self.bridge.set_controls(self.car_controls)
-                        print("A")
                     elif sign.depth <= LOOKAHEAD_DEPTH:
                         self.cc_state.add(CCState.STREET_RULE)
                         self.stop_state = StopState.DETECTED
@@ -271,15 +269,12 @@ class CentralControl:
                 if self.stop_state == StopState.STOPPING:
                     self.car_controls.brake = HOLD_BRAKE
                     self.car_controls.throttle = STOP_THROTTLE
-                    #self.bridge.set_controls(self.car_controls)
-
                     if self.speed == STOPPED_SPEED:
                         # When you are stopped, you can start the resuming process
                         self.stop_state = StopState.RESUMING
                 elif self.stop_state == StopState.RESUMING:
                     # Stop breaking
                     self.car_controls.brake = RELEASE_BRAKE
-                    #self.bridge.set_controls(self.car_controls)
 
                     # Count down cooldown period
                     if not self.sign_data:
@@ -457,17 +452,6 @@ class CentralControl:
             if detection.class_num == 11 and detection.depth < 40 and detection.confidence > 0.4:
                 # Stop sign. Depth is likely going to be smaller than 25 because of the image resolution
                 self.sign_data.append(detection)
-
-    '''def handle_stop_sign(self, res: DetectionResults):
-        if not self.ready:
-            self.ready = True
-        # Sort through and deal with sign detection
-        self.sign_data.clear()
-        detection_list: List[DetectionResult] = res.detection_results
-        for detection in detection_list:
-            if detection.class_num == 11 and detection.depth < 50 and detection.confidence > 0.2:
-                # Stop sign. Depth is likely going to be smaller than 25 because of the image resolution
-                self.sign_data.append(detection)'''
 
 
 if __name__ == "__main__":
