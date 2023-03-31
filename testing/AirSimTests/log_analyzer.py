@@ -1,4 +1,5 @@
 import json
+import math
 import sys
 from types import SimpleNamespace
 from datetime import datetime
@@ -10,8 +11,8 @@ from sympy import Point, Segment
 from common.models import LogEntry
 from Models import X_COORD, Y_COORD, point_to_gui_coords, RoadSegmentType
 
-TARGET_AREA = 400.0
-TARGET_TIME = 60
+TARGET_AREA_FRAC = 0.05  # Average a deviation of no more than 0.05 m^2 for every metre
+TARGET_TIME_FRAC = 4  # Average 4 m/s
 MAX_STEERING = 0.20
 NH = 'NH'
 CITY = 'CITY'
@@ -35,7 +36,7 @@ def get_actual_transparency(intensity: int) -> Tuple[int, int, int]:
 
     # Cap intensity at MAX_INTENSITY
     intensity = min(intensity, MAX_INTENSITY)
-    rg = intensity * 255 // MAX_INTENSITY
+    rg = 255 - (intensity * 255 // MAX_INTENSITY)
     return rg, rg, 255
 
 
@@ -49,7 +50,7 @@ class LogAnalyzer:
         self.env_id = ENV_IDS[env]
         map_path = Path(__file__).parents[2] / 'src' / 'mapping_navigation' / 'paths' / f'{self.test_case}.pickle'
         map_model = MapSerializer.load_from_filename(str(map_path))
-        self.path = map_model.paths[0]
+        self.path = map_model.convert_path(0)
 
         with open(filepath, 'r') as f:
             self.log: List[LogEntry] = json.load(f, object_hook=lambda d: SimpleNamespace(**d))
@@ -57,16 +58,13 @@ class LogAnalyzer:
         if not self.log:
             raise Exception('No data to analyze')
 
-        for e in self.log:
-            # Convert AirSim coords to GUI format
-            e.pos = point_to_gui_coords(e.pos, self.env_id)
-
-        pickle_path = [Point(x, y, evaluate=False) for x, y, _ in map_model.convert_path(0)]
-        self.path_img = PathImage(self.path.get_gui_coords(), env)
+        pickle_path = [Point(x, y, evaluate=False) for x, y, _ in self.path]
+        self.path_img = PathImage(map_model.paths[0].get_gui_coords(), env)
 
         self.segments = []
         for i in range(len(pickle_path) - 1):
             self.segments.append(Segment(pickle_path[i], pickle_path[i + 1]))
+        self.path_len = sum([s.length for s in self.segments])
 
         self.metrics = []
         self.warnings = []
@@ -86,22 +84,23 @@ class LogAnalyzer:
             self.incident_positions.append(entry.pos)
 
     def analyze_point(self, current_point: Tuple[float, float], last_point: Tuple[float, float]):
-        point_tuple = current_point
+        current_x, current_y = current_point
+        last_x, last_y = last_point
 
         # Get shortest distance to pre-computed segments
-        distance = min([s.distance(point_tuple) for s in self.segments])
+        distance = min([s.distance(current_point) for s in self.segments])
 
-        # Estimate area as a rectangle bounded by distance between point and segment with last point,
-        # weighted to represent a smaller number
-        return distance * (Point(point_tuple).distance(last_point)) / 1000.0
+        # Estimate area as a rectangle bounded by distance between point and segment with last point
+        return distance * (math.sqrt((current_x - last_x) ** 2 + (current_y - last_y) ** 2))
 
     def get_closest_seg_type(self, current_point: Tuple[float, float]) -> RoadSegmentType:
-        closest = min(self.path.points, key=lambda x: Point(x.x, x.y).distance(current_point))
-        return closest.seg_type
+        _, _, seg_type = min(self.path, key=lambda x: Point(x[X_COORD], x[Y_COORD]).distance(current_point))
+        return seg_type
 
     def analyze_speed(self, start_time: datetime, end_time: datetime):
         delta = (end_time - start_time).seconds
-        self.metrics.append(f'Log runtime was {delta} seconds. Target value is {TARGET_TIME}')
+        target_time = self.path_len / TARGET_TIME_FRAC
+        self.metrics.append(f'Log runtime was {delta} seconds. Target value is {target_time:.2f}')
 
     def analyze(self):
         last_point: Tuple[float, float] = self.log[0].pos
@@ -115,7 +114,11 @@ class LogAnalyzer:
                 start_time = datetime.strptime(entry.time, "%Y-%m-%d %H:%M:%S")
 
             point_tuple = entry.pos
-            self.path_img.draw_actual_segment(last_point, point_tuple, entry.lidar_detections)
+            self.path_img.draw_actual_segment(
+                point_to_gui_coords(last_point, self.env_id),
+                point_to_gui_coords(point_tuple, self.env_id),
+                entry.lidar_detections
+            )
             lidar_detections += entry.lidar_detections
 
             area += self.analyze_point(entry.pos, last_point)
@@ -140,7 +143,8 @@ class LogAnalyzer:
             end_time = datetime.strptime(entry.time, "%Y-%m-%d %H:%M:%S")
             last_point = entry.pos
 
-        self.metrics.append(f'Area between target and actual path is {area:.2f}. Target value is {TARGET_AREA:.2f}')
+        target_area = sum([s.length for s in self.segments]) * TARGET_AREA_FRAC
+        self.metrics.append(f'Area between target and actual path is {area:.2f}. Target value is {target_area:.2f}')
         self.metrics.append(f'Total objects detected by lidar: {lidar_detections}')
         self.analyze_speed(start_time, end_time)
         self.path_img.save(f'{self.test_case}.png')
