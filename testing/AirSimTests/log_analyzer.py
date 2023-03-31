@@ -1,4 +1,5 @@
 import json
+import math
 import sys
 from types import SimpleNamespace
 from datetime import datetime
@@ -86,14 +87,15 @@ class LogAnalyzer:
             self.incident_positions.append(entry.pos)
 
     def analyze_point(self, current_point: Tuple[float, float], last_point: Tuple[float, float]):
-        point_tuple = current_point
+        current_x, current_y = current_point
+        last_x, last_y = last_point
 
         # Get shortest distance to pre-computed segments
-        distance = min([s.distance(point_tuple) for s in self.segments])
+        distance = min([s.distance(current_point) for s in self.segments])
 
         # Estimate area as a rectangle bounded by distance between point and segment with last point,
         # weighted to represent a smaller number
-        return distance * (Point(point_tuple).distance(last_point)) / 1000.0
+        return distance * (math.sqrt((current_x - last_x) ** 2 + (current_y - last_y) ** 2))
 
     def get_closest_seg_type(self, current_point: Tuple[float, float]) -> RoadSegmentType:
         closest = min(self.path.points, key=lambda x: Point(x.x, x.y).distance(current_point))
