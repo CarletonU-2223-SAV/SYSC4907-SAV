@@ -11,8 +11,8 @@ from sympy import Point, Segment
 from common.models import LogEntry
 from Models import X_COORD, Y_COORD, point_to_gui_coords, RoadSegmentType
 
-TARGET_AREA = 10.0
-TARGET_TIME = 60
+TARGET_AREA_FRAC = 0.05  # Average a deviation of no more than 0.05 m^2 for every metre
+TARGET_TIME_FRAC = 4  # Average 4 m/s
 MAX_STEERING = 0.20
 NH = 'NH'
 CITY = 'CITY'
@@ -64,6 +64,7 @@ class LogAnalyzer:
         self.segments = []
         for i in range(len(pickle_path) - 1):
             self.segments.append(Segment(pickle_path[i], pickle_path[i + 1]))
+        self.path_len = sum([s.length for s in self.segments])
 
         self.metrics = []
         self.warnings = []
@@ -98,7 +99,8 @@ class LogAnalyzer:
 
     def analyze_speed(self, start_time: datetime, end_time: datetime):
         delta = (end_time - start_time).seconds
-        self.metrics.append(f'Log runtime was {delta} seconds. Target value is {TARGET_TIME}')
+        target_time = self.path_len / TARGET_TIME_FRAC
+        self.metrics.append(f'Log runtime was {delta} seconds. Target value is {target_time:.2f}')
 
     def analyze(self):
         last_point: Tuple[float, float] = self.log[0].pos
@@ -141,7 +143,8 @@ class LogAnalyzer:
             end_time = datetime.strptime(entry.time, "%Y-%m-%d %H:%M:%S")
             last_point = entry.pos
 
-        self.metrics.append(f'Area between target and actual path is {area:.2f}. Target value is {TARGET_AREA:.2f}')
+        target_area = sum([s.length for s in self.segments]) * TARGET_AREA_FRAC
+        self.metrics.append(f'Area between target and actual path is {area:.2f}. Target value is {target_area:.2f}')
         self.metrics.append(f'Total objects detected by lidar: {lidar_detections}')
         self.analyze_speed(start_time, end_time)
         self.path_img.save(f'{self.test_case}.png')
