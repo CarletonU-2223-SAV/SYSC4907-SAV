@@ -88,6 +88,34 @@ class LaneKeepAssist:
             self.gradient_percent_diff = [100]
             self.hls_percent_diff = [100]
 
+            # Determine the position of the vehicle relative to the lane
+            position = 0
+            if self.gradient_state == LaneBoundStatus.SUCCESS:
+                # Use the gradient lane lines
+                left_lane = self.gradient_lanes[0]
+                right_lane = self.gradient_lanes[1]
+                lane_center = (left_lane.x2 + right_lane.x2) // 2
+                car_center = self.image.width // 2
+                position = car_center - lane_center
+            elif self.hls_state == LaneBoundStatus.SUCCESS:
+                # Use the HLS lane lines
+                left_lane = self.hls_lanes[0]
+                right_lane = self.hls_lanes[1]
+                lane_center = (left_lane.x2 + right_lane.x2) // 2
+                car_center = self.image.width // 2
+                position = car_center - lane_center
+
+            # Adjust the steering based on the position
+            if position > 20:
+                # Too far to the left, steer right
+                steering = -1
+            elif position < -20:
+                # Too far to the right, steer left
+                steering = 1
+            else:
+                # Centered in the lane, no steering adjustment needed
+                steering = 0
+
         rospy.loginfo(f"Gradient Result: Lane state={self.gradient_state}, Percent Diff={self.gradient_percent_diff}, Lanes={self.gradient_lanes}")
         rospy.loginfo(f"HLS Result: Lane state={self.hls_state}, Percent Diff={self.hls_percent_diff}, Lanes={self.hls_lanes}")
         rospy.loginfo(f"Segmentation Result: Lane state={self.segmentation_state}, Lanes={self.segmentation_lane}\n")
