@@ -50,7 +50,7 @@ class LogAnalyzer:
         self.env_id = ENV_IDS[env]
         map_path = Path(__file__).parents[2] / 'src' / 'mapping_navigation' / 'paths' / f'{self.test_case}.pickle'
         map_model = MapSerializer.load_from_filename(str(map_path))
-        self.path = map_model.paths[0]
+        self.path = map_model.convert_path(0)
 
         with open(filepath, 'r') as f:
             self.log: List[LogEntry] = json.load(f, object_hook=lambda d: SimpleNamespace(**d))
@@ -62,8 +62,8 @@ class LogAnalyzer:
             # Convert AirSim coords to GUI format
             e.pos = point_to_gui_coords(e.pos, self.env_id)
 
-        pickle_path = [Point(x, y, evaluate=False) for x, y, _ in map_model.convert_path(0)]
-        self.path_img = PathImage(self.path.get_gui_coords(), env)
+        pickle_path = [Point(x, y, evaluate=False) for x, y, _ in self.path]
+        self.path_img = PathImage(map_model.paths[0].get_gui_coords(), env)
 
         self.segments = []
         for i in range(len(pickle_path) - 1):
@@ -98,8 +98,8 @@ class LogAnalyzer:
         return distance * (math.sqrt((current_x - last_x) ** 2 + (current_y - last_y) ** 2))
 
     def get_closest_seg_type(self, current_point: Tuple[float, float]) -> RoadSegmentType:
-        closest = min(self.path.points, key=lambda x: Point(x.x, x.y).distance(current_point))
-        return closest.seg_type
+        _, _, seg_type = min(self.path, key=lambda x: Point(x[X_COORD], x[Y_COORD]).distance(current_point))
+        return seg_type
 
     def analyze_speed(self, start_time: datetime, end_time: datetime):
         delta = (end_time - start_time).seconds
