@@ -90,14 +90,14 @@ class LaneKeepAssist:
 
             # Determine the position of the vehicle relative to the lane
             position = 0
-            if self.gradient_state == LaneBoundStatus.SUCCESS:
+            if self.gradient_state == LaneBoundStatus.TWO_BOUNDS:
                 # Use the gradient lane lines
                 left_lane = self.gradient_lanes[0]
                 right_lane = self.gradient_lanes[1]
                 lane_center = (left_lane.x2 + right_lane.x2) // 2
                 car_center = self.image.width // 2
                 position = car_center - lane_center
-            elif self.hls_state == LaneBoundStatus.SUCCESS:
+            elif self.hls_state == LaneBoundStatus.TWO_BOUNDS:
                 # Use the HLS lane lines
                 left_lane = self.hls_lanes[0]
                 right_lane = self.hls_lanes[1]
