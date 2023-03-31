@@ -11,7 +11,7 @@ from sympy import Point, Segment
 from common.models import LogEntry
 from Models import X_COORD, Y_COORD, point_to_gui_coords, RoadSegmentType
 
-TARGET_AREA = 400.0
+TARGET_AREA = 10.0
 TARGET_TIME = 60
 MAX_STEERING = 0.20
 NH = 'NH'
@@ -58,10 +58,6 @@ class LogAnalyzer:
         if not self.log:
             raise Exception('No data to analyze')
 
-        for e in self.log:
-            # Convert AirSim coords to GUI format
-            e.pos = point_to_gui_coords(e.pos, self.env_id)
-
         pickle_path = [Point(x, y, evaluate=False) for x, y, _ in self.path]
         self.path_img = PathImage(map_model.paths[0].get_gui_coords(), env)
 
@@ -93,8 +89,7 @@ class LogAnalyzer:
         # Get shortest distance to pre-computed segments
         distance = min([s.distance(current_point) for s in self.segments])
 
-        # Estimate area as a rectangle bounded by distance between point and segment with last point,
-        # weighted to represent a smaller number
+        # Estimate area as a rectangle bounded by distance between point and segment with last point
         return distance * (math.sqrt((current_x - last_x) ** 2 + (current_y - last_y) ** 2))
 
     def get_closest_seg_type(self, current_point: Tuple[float, float]) -> RoadSegmentType:
@@ -117,7 +112,11 @@ class LogAnalyzer:
                 start_time = datetime.strptime(entry.time, "%Y-%m-%d %H:%M:%S")
 
             point_tuple = entry.pos
-            self.path_img.draw_actual_segment(last_point, point_tuple, entry.lidar_detections)
+            self.path_img.draw_actual_segment(
+                point_to_gui_coords(last_point, self.env_id),
+                point_to_gui_coords(point_tuple, self.env_id),
+                entry.lidar_detections
+            )
             lidar_detections += entry.lidar_detections
 
             area += self.analyze_point(entry.pos, last_point)
