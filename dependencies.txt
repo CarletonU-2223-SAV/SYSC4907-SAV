@@ -9,6 +9,7 @@ opencv-contrib-python==4.5.3.56
 opencv-python==4.4.0.44
 pandas==1.4.1
 Pillow==8.2.0
+pyflakes==2.2.0
 pytest==6.1.0
 scikit-learn==1.0.2
 seaborn==0.11.2
