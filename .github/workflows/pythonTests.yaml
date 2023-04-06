@@ -7,7 +7,6 @@ on:
   push:
     branches:
       - master
-      - configure_auto_test
 
 jobs:
   build:
