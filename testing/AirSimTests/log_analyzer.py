@@ -37,7 +37,7 @@ def get_actual_transparency(intensity: int) -> Tuple[int, int, int]:
     # Cap intensity at MAX_INTENSITY
     intensity = min(intensity, MAX_INTENSITY)
     rg = 255 - (intensity * 255 // MAX_INTENSITY)
-    return rg, rg, 255
+    return 0, 0, 255
 
 
 class LogAnalyzer:
