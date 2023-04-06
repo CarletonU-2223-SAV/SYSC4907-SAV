@@ -84,7 +84,7 @@ class StopSignDetector:
         gray_img = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)
         path = Path(__file__).parent
         stop_cascade = cv2.CascadeClassifier(str(path / 'stop_sign.xml'))
-        stops = stop_cascade.detectMultiScale(gray_img, scaleFactor=1.0095, minNeighbors=10, minSize=(20, 20))
+        stops = stop_cascade.detectMultiScale(gray_img, scaleFactor=1.00095, minNeighbors=10, minSize=(20, 20))
         # res_list = results.pandas().xyxy[0].to_numpy().tolist()
         res_list = []
         detect_results = []
@@ -111,11 +111,9 @@ class StopSignDetector:
             dr.class_num = elem[CLASS_NUM]
             dr.name = elem[NAME]
             file = open('DetectionResult.txt', 'w')
-            file.write(str(dr))
+            file.write(str(dr) + '\n')
             file.close()
-            file.write(dr + "\n")
 
-            file.close()
             detect_results.append(dr)
 
         return detect_results
