@@ -110,12 +110,8 @@ class StopSignDetector:
             dr.confidence = elem[CONFIDENCE]
             dr.class_num = elem[CLASS_NUM]
             dr.name = elem[NAME]
-            file = open('DetectionResult.txt', 'w')
-            file.write(str(dr) + '\n')
-            file.close()
 
             detect_results.append(dr)
-
         return detect_results
 
 
