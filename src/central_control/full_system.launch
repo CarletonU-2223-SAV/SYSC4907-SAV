@@ -11,9 +11,6 @@
       This is needed for automated testing. -->
   <node name="central_control" pkg="central_control" type="central_control.py" />
   <node name="lane_keep_assist" pkg="lane_keep_assist" type="send_lane.py" />
-
-<!-- We're not using this node for now because the sign and car recognition are the same node for now -->
-<!--   <node name="car_detect" pkg="sign_car_recognition" type="car_detect.py" /> -->
   <node name="car_detect" pkg="sign_car_recognition" type="sign_detect.py" />
   <node name="stop_sign_detect" pkg="sign_car_recognition" type="new_sign_detect.py" />
   <node name="object_detect" pkg="lidar_object_recognition_2" type="new_lidar_object_detect.py"/>
