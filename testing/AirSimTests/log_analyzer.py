@@ -142,7 +142,7 @@ class LogAnalyzer:
             end_time = datetime.strptime(entry.time, "%Y-%m-%d %H:%M:%S")
             last_point = entry.pos
 
-        self.path_img.draw_incidents(self.incident_positions)
+        self.path_img.draw_incidents(self.incident_positions, self.env_id)
         target_area = sum([s.length for s in self.segments]) * TARGET_AREA_FRAC
         self.metrics.append(f'Area between target and actual path is {area:.2f}. Target value is {target_area:.2f}')
         self.metrics.append(f'Total objects detected by lidar: {lidar_detections}')
