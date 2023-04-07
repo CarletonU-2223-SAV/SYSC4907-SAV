@@ -197,8 +197,9 @@ class PathImage:
     def draw_collision_point(self, point: Tuple[float, float]):
         self.draw.text(point, "X", self.COLLISION_COLOUR)
 
-    def draw_incidents(self, incidents: List[Tuple[float, float]]):
-        for i, (x, y) in enumerate(incidents):
+    def draw_incidents(self, incidents: List[Tuple[float, float]], env_id: int):
+        for i, point in enumerate(incidents):
+            x, y = point_to_gui_coords(point, env_id)
             self.draw.ellipse(
                 (x - self.INCIDENT_RADIUS, y - self.INCIDENT_RADIUS,
                  x + self.INCIDENT_RADIUS, y + self.INCIDENT_RADIUS),
