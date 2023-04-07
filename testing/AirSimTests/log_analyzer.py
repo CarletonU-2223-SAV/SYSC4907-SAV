@@ -125,7 +125,6 @@ class LogAnalyzer:
             closest_seg = self.get_closest_seg_type(point_tuple)
             if closest_seg == RoadSegmentType.STRAIGHT:
                 self.analyze_steering(entry)
-            self.path_img.draw_incidents(self.incident_positions)
 
             if entry.has_collided:
                 end_time = datetime.strptime(entry.time, "%Y-%m-%d %H:%M:%S")
@@ -143,6 +142,7 @@ class LogAnalyzer:
             end_time = datetime.strptime(entry.time, "%Y-%m-%d %H:%M:%S")
             last_point = entry.pos
 
+        self.path_img.draw_incidents(self.incident_positions)
         target_area = sum([s.length for s in self.segments]) * TARGET_AREA_FRAC
         self.metrics.append(f'Area between target and actual path is {area:.2f}. Target value is {target_area:.2f}')
         self.metrics.append(f'Total objects detected by lidar: {lidar_detections}')
