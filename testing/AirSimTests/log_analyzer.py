@@ -125,7 +125,7 @@ class LogAnalyzer:
             closest_seg = self.get_closest_seg_type(point_tuple)
             if closest_seg == RoadSegmentType.STRAIGHT:
                 self.analyze_steering(entry)
-            self.path_img.draw_incidents(self.incident_positions)
+            self.path_img.draw_incidents(self.incident_positions, self.env_id)
 
             if entry.has_collided:
                 end_time = datetime.strptime(entry.time, "%Y-%m-%d %H:%M:%S")
@@ -197,8 +197,9 @@ class PathImage:
     def draw_collision_point(self, point: Tuple[float, float]):
         self.draw.text(point, "X", self.COLLISION_COLOUR)
 
-    def draw_incidents(self, incidents: List[Tuple[float, float]]):
-        for i, (x, y) in enumerate(incidents):
+    def draw_incidents(self, incidents: List[Tuple[float, float]], env_id: int):
+        for i, point in enumerate(incidents):
+            x, y = point_to_gui_coords(point, env_id)
             self.draw.ellipse(
                 (x - self.INCIDENT_RADIUS, y - self.INCIDENT_RADIUS,
                  x + self.INCIDENT_RADIUS, y + self.INCIDENT_RADIUS),
